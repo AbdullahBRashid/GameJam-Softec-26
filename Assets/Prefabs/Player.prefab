@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 684840139042110257}
   - component: {fileID: 1757713734796960659}
   - component: {fileID: 8591713376199454719}
-  - component: {fileID: 4986744442642330600}
   - component: {fileID: 8747346954675888561}
   m_Layer: 0
   m_Name: Player
@@ -91,7 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 236095cc49f85634e9607cd2e080e5c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  speed: 2
+  speed: 5
   gravity: -19.62
   jumpHeight: 2
 --- !u!114 &5587569830403740506
@@ -175,28 +174,6 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &4986744442642330600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596158413587155261}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b357574a1a0b734b878aea0ea97c494, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractionSystem
-  cameraTransform: {fileID: 0}
-  interactRange: 4
-  interactableLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  interactPromptUI: {fileID: 0}
-  interactionPanel: {fileID: 0}
-  takeButtonContainer: {fileID: 0}
-  applyButtonContainer: {fileID: 0}
-  attributeButtonPrefab: {fileID: 0}
 --- !u!114 &8747346954675888561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -235,13 +212,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7175596948067445962}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.003, y: 1.653, z: 0.147}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.003, y: 1.618, z: 0.112}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8490205893619003629}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1001 &8239894325894043398
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -264,7 +241,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e56c52a2613e469488fefcf280a6deac, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e56c52a2613e469488fefcf280a6deac, type: 3}
       propertyPath: m_LocalRotation.x
@@ -272,7 +249,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e56c52a2613e469488fefcf280a6deac, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e56c52a2613e469488fefcf280a6deac, type: 3}
       propertyPath: m_LocalRotation.z
@@ -284,7 +261,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e56c52a2613e469488fefcf280a6deac, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e56c52a2613e469488fefcf280a6deac, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z

@@ -125,4 +125,59 @@ public class AttributeInventory : MonoBehaviour
         _sourceMap.Remove(attribute);
         _wasDefaultMap.Remove(attribute);
     }
+
+    // ═══ Checkpoints / Save State ═══════════════════════════════════
+
+    /// <summary>
+    /// Represents a saved state of the inventory.
+    /// </summary>
+    public class InventorySnapshot
+    {
+        public List<AttributeSO> Items = new List<AttributeSO>();
+        public Dictionary<AttributeSO, GameObject> SourceMap = new Dictionary<AttributeSO, GameObject>();
+        public Dictionary<AttributeSO, bool> WasDefaultMap = new Dictionary<AttributeSO, bool>();
+    }
+
+    /// <summary>
+    /// Returns a deep copy of the current inventory state.
+    /// </summary>
+    public InventorySnapshot GetSnapshot()
+    {
+        return new InventorySnapshot
+        {
+            Items = new List<AttributeSO>(inventory),
+            SourceMap = new Dictionary<AttributeSO, GameObject>(_sourceMap),
+            WasDefaultMap = new Dictionary<AttributeSO, bool>(_wasDefaultMap)
+        };
+    }
+
+    /// <summary>
+    /// Restores the inventory to a previously saved snapshot.
+    /// </summary>
+    public void RestoreFromSnapshot(InventorySnapshot snapshot)
+    {
+        inventory.Clear();
+        _sourceMap.Clear();
+        _wasDefaultMap.Clear();
+
+        if (snapshot != null)
+        {
+            inventory.AddRange(snapshot.Items);
+            foreach (var kvp in snapshot.SourceMap) _sourceMap[kvp.Key] = kvp.Value;
+            foreach (var kvp in snapshot.WasDefaultMap) _wasDefaultMap[kvp.Key] = kvp.Value;
+        }
+
+        Debug.Log($"[AttributeInventory] Inventory restored to checkpoint ({inventory.Count}/{maxCapacity}).");
+    }
+
+    /// <summary>
+    /// Clears the entire inventory.
+    /// </summary>
+    public void ClearAll()
+    {
+        inventory.Clear();
+        _sourceMap.Clear();
+        _wasDefaultMap.Clear();
+        Debug.Log("[AttributeInventory] Inventory cleared.");
+    }
 }

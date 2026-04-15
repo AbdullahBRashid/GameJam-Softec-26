@@ -261,4 +261,72 @@ public class AttributeController : MonoBehaviour
         isLocked = false;
         Debug.Log($"[AttributeController] 🔓 {gameObject.name} UNLOCKED.");
     }
+
+    // ═══ Checkpoints / Save State ═══════════════════════════════════
+
+    /// <summary>
+    /// Returns a copy of the current active attributes for checkpointing.
+    /// </summary>
+    public List<AttributeSO> GetAttributeSnapshot()
+    {
+        return new List<AttributeSO>(activeAttributes);
+    }
+
+    /// <summary>
+    /// Force-restores the object's attributes from a snapshot.
+    /// Bypasses volatility events (system-level reset).
+    /// </summary>
+    public void RestoreFromSnapshot(List<AttributeSO> snapshot)
+    {
+        ClearAllEffects();
+
+        activeAttributes.Clear();
+        _missingDefaults.Clear();
+        
+        // Re-calculate missing defaults
+        foreach (var attr in defaultAttributes)
+        {
+            if (attr != null) _missingDefaults.Add(attr.attributeID);
+        }
+
+        foreach (var attr in snapshot)
+        {
+            if (attr == null) continue;
+
+            IAttributeEffect effect = AttributeEffectFactory.GetEffect(attr);
+            if (effect != null)
+            {
+                effect.Apply(gameObject, attr);
+                _liveEffects[attr.attributeID] = effect;
+                activeAttributes.Add(attr);
+                _missingDefaults.Remove(attr.attributeID);
+            }
+        }
+
+        Debug.Log($"[AttributeController] {gameObject.name} restored to checkpoint state ({activeAttributes.Count} attributes).");
+    }
+
+    /// <summary>
+    /// Resets the object entirely back to its initial default state.
+    /// Used when a stage is manually reset by the player.
+    /// </summary>
+    public void ResetToDefaults()
+    {
+        ClearAllEffects();
+        InitializeDefaults();
+    }
+
+    private void ClearAllEffects()
+    {
+        // Must remove backwards or copy list since we modify activeAttributes inside effect.Remove
+        List<AttributeSO> currentCopy = new List<AttributeSO>(activeAttributes);
+        foreach (var attr in currentCopy)
+        {
+            if (_liveEffects.TryGetValue(attr.attributeID, out IAttributeEffect effect))
+            {
+                effect.Remove(gameObject, attr);
+            }
+        }
+        _liveEffects.Clear();
+    }
 }

@@ -63,6 +63,20 @@ public static class GameEventManager
     /// <summary>Fired when gravity should be reversed. Args: (bool isReversed)</summary>
     public static event Action<bool> OnGravityReversed;
 
+    // ─── Health Events ──────────────────────────────────────────────
+    /// <summary>Fired when the player's health changes. Args: (int currentHealth, int maxHealth)</summary>
+    public static event Action<int, int> OnPlayerHealthChanged;
+
+    /// <summary>Fired when the player dies.</summary>
+    public static event Action OnPlayerDied;
+
+    // ─── Stage Events ───────────────────────────────────────────────
+    /// <summary>Fired when the player enters a stage zone. Args: (int stageIndex)</summary>
+    public static event Action<int> OnStageEntered;
+
+    /// <summary>Fired when a stage is reset by the player.</summary>
+    public static event Action OnStageReset;
+
     // ═══ Invoke Methods ═════════════════════════════════════════════
 
     // -- Volatility-specific removal events --
@@ -146,6 +160,26 @@ public static class GameEventManager
     public static void GravityReversed(bool isReversed)
     {
         OnGravityReversed?.Invoke(isReversed);
+    }
+
+    public static void PlayerHealthChanged(int current, int max)
+    {
+        OnPlayerHealthChanged?.Invoke(current, max);
+    }
+
+    public static void PlayerDied()
+    {
+        OnPlayerDied?.Invoke();
+    }
+
+    public static void StageEntered(int stageIndex)
+    {
+        OnStageEntered?.Invoke(stageIndex);
+    }
+
+    public static void StageReset()
+    {
+        OnStageReset?.Invoke();
     }
 }
 
