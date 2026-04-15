@@ -1,13 +1,15 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Raycast-based interaction system.
-/// Detects objects with an AttributeController and allows
-/// the player to Take (E) or Apply (Q) attributes.
-/// 
+/// Raycast-based interaction system with UI selection panel.
+/// Press Interact (E) to open the panel when looking at an interactable.
+/// Press E again to close it. Camera and movement freeze while panel is open.
+///
 /// Setup: Add to the Player GameObject.
 ///        Assign the Camera transform in the Inspector.
+///        Assign the InteractionPanel UI prefab.
 /// </summary>
 [RequireComponent(typeof(AttributeInventory))]
 public class InteractionSystem : MonoBehaviour
@@ -26,31 +28,71 @@ public class InteractionSystem : MonoBehaviour
     [Tooltip("Crosshair or prompt text that appears when looking at an interactable.")]
     [SerializeField] private GameObject interactPromptUI;
 
+    [Header("Interaction Panel")]
+    [Tooltip("The interaction panel Canvas (disable by default in editor).")]
+    [SerializeField] private GameObject interactionPanel;
+
+    [Tooltip("Parent transform for TAKE buttons (object's attributes).")]
+    [SerializeField] private Transform takeButtonContainer;
+
+    [Tooltip("Parent transform for APPLY buttons (player's inventory).")]
+    [SerializeField] private Transform applyButtonContainer;
+
+    [Tooltip("Prefab for each attribute button in the panel.")]
+    [SerializeField] private GameObject attributeButtonPrefab;
+
     // ── Cached References ──
     private AttributeInventory _inventory;
     private AttributeController _currentTarget;
+    private bool _panelOpen = false;
+
+    // ── Components to disable when panel is open ──
+    private PlayerMovement _playerMovement;
+    private MonoBehaviour _cinemachineInputController;
 
     private void Awake()
     {
         _inventory = GetComponent<AttributeInventory>();
+        _playerMovement = GetComponent<PlayerMovement>();
 
         if (cameraTransform == null)
         {
-            // Fallback: try to find the main camera
             Camera cam = Camera.main;
             if (cam != null) cameraTransform = cam.transform;
+        }
+
+        if (interactionPanel != null)
+            interactionPanel.SetActive(false);
+    }
+
+    private void Start()
+    {
+        // Find the Cinemachine input controller in the scene to disable it during interaction
+        // CinemachineInputAxisController is the component that reads mouse input for camera look
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mb.GetType().Name == "CinemachineInputAxisController")
+            {
+                _cinemachineInputController = mb;
+                break;
+            }
         }
     }
 
     private void Update()
     {
-        PerformRaycast();
+        if (!_panelOpen)
+        {
+            PerformRaycast();
+        }
     }
 
     // ═══ Raycast ════════════════════════════════════════════════════
 
     private void PerformRaycast()
     {
+        if (cameraTransform == null) return;
+
         Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactRange, interactableLayer))
@@ -65,73 +107,226 @@ public class InteractionSystem : MonoBehaviour
             }
         }
 
-        // Nothing hit or no controller found
         _currentTarget = null;
         if (interactPromptUI != null) interactPromptUI.SetActive(false);
     }
 
-    // ═══ Input Callbacks (New Input System) ═════════════════════════
-    // Bind these in Player Actions:
-    //   "Take"  → E key
-    //   "Apply" → Q key
+    // ═══ Input Callback (New Input System — Send Messages) ══════════
 
     /// <summary>
-    /// TAKE (E): Remove the first attribute from the target object
-    /// and add it to the player's inventory.
+    /// INTERACT (E): Opens/closes the interaction panel for the current target.
     /// </summary>
     public void OnTake(InputValue value)
     {
         if (!value.isPressed) return;
+
+        // If panel is open, close it
+        if (_panelOpen)
+        {
+            ClosePanel();
+            return;
+        }
+
         if (_currentTarget == null)
         {
             Debug.Log("[InteractionSystem] No target in range.");
             return;
         }
 
-        if (_currentTarget.AttributeCount == 0)
+        if (interactionPanel == null || attributeButtonPrefab == null)
         {
-            Debug.Log("[InteractionSystem] Target has no attributes to take.");
+            Debug.LogWarning("[InteractionSystem] Interaction Panel or Button Prefab not assigned!");
             return;
         }
 
-        // Take the first attribute from the object
-        AttributeSO taken = _currentTarget.RemoveFirst();
-        if (taken != null)
+        OpenPanel();
+    }
+
+    // ═══ Panel UI ═══════════════════════════════════════════════════
+
+    private void OpenPanel()
+    {
+        _panelOpen = true;
+        interactionPanel.SetActive(true);
+
+        // Unlock cursor for UI interaction
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Freeze player movement
+        if (_playerMovement != null)
+            _playerMovement.enabled = false;
+
+        // Freeze camera panning
+        if (_cinemachineInputController != null)
+            _cinemachineInputController.enabled = false;
+
+        PopulatePanel();
+    }
+
+    public void ClosePanel()
+    {
+        _panelOpen = false;
+        if (interactionPanel != null)
+            interactionPanel.SetActive(false);
+
+        // Re-lock cursor for FPS controls
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // Re-enable player movement
+        if (_playerMovement != null)
+            _playerMovement.enabled = true;
+
+        // Re-enable camera panning
+        if (_cinemachineInputController != null)
+            _cinemachineInputController.enabled = true;
+    }
+
+    private void PopulatePanel()
+    {
+        // Clear existing buttons
+        ClearContainer(takeButtonContainer);
+        ClearContainer(applyButtonContainer);
+
+        // ── TAKE section: show object's attributes ──
+        if (_currentTarget != null && !_currentTarget.IsLocked)
         {
-            bool added = _inventory.AddAttribute(taken);
-            if (!added)
+            foreach (var attr in _currentTarget.ActiveAttributes)
             {
-                // Inventory full — put it back
-                _currentTarget.ApplyAttribute(taken);
-                Debug.Log("[InteractionSystem] Inventory full. Attribute returned to object.");
+                CreateTakeButton(attr);
+            }
+        }
+
+        // ── APPLY section: show compatible inventory attributes ──
+        if (_currentTarget != null)
+        {
+            foreach (var attr in _inventory.Items)
+            {
+                if (_currentTarget.CanAccept(attr))
+                {
+                    CreateApplyButton(attr);
+                }
             }
         }
     }
 
-    /// <summary>
-    /// APPLY (Q): Take the first attribute from the player's inventory
-    /// and apply it to the target object.
-    /// </summary>
-    public void OnApply(InputValue value)
+    private void CreateTakeButton(AttributeSO attr)
     {
-        if (!value.isPressed) return;
-        if (_currentTarget == null)
+        if (takeButtonContainer == null || attributeButtonPrefab == null) return;
+
+        GameObject btn = Object.Instantiate(attributeButtonPrefab, takeButtonContainer);
+        btn.name = $"Take_{attr.displayName}";
+
+        // Calculate cost info for taking this attribute
+        bool isDefault = _currentTarget.IsDefaultAttribute(attr);
+        string costStr = isDefault ? $"  <color=#F05545>+{attr.volatilityCost:F0}</color>" : "  <color=#888888>+0</color>";
+        string label = $"TAKE{costStr}";
+
+        var buttonUI = btn.GetComponent<AttributeButtonUI>();
+        if (buttonUI != null)
         {
-            Debug.Log("[InteractionSystem] No target in range.");
+            buttonUI.Setup(attr, label, attr.attributeColor, () => OnTakeButtonClicked(attr));
+        }
+        else
+        {
+            var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
+            var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
+            if (uiText != null) { uiText.text = $"Take: {attr.displayName} ({(isDefault ? "+" + attr.volatilityCost : "+0")})"; uiText.supportRichText = true; }
+            if (uiButton != null) uiButton.onClick.AddListener(() => OnTakeButtonClicked(attr));
+
+            var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            if (tmpText != null) { tmpText.text = $"Take: {attr.displayName} ({(isDefault ? "+" + attr.volatilityCost : "+0")})"; tmpText.richText = true; }
+        }
+    }
+
+    private void CreateApplyButton(AttributeSO attr)
+    {
+        if (applyButtonContainer == null || attributeButtonPrefab == null) return;
+
+        GameObject btn = Object.Instantiate(attributeButtonPrefab, applyButtonContainer);
+        btn.name = $"Apply_{attr.displayName}";
+
+        // Calculate cost info for applying this attribute
+        bool isRestoring = _currentTarget.IsDefaultAttribute(attr) && _currentTarget.IsMissingDefault(attr);
+        float reduction = isRestoring ? attr.volatilityCost : attr.volatilityCost * 0.5f;
+        string costStr = isRestoring
+            ? $"  <color=#2ECC71>-{reduction:F0}</color>"
+            : $"  <color=#F1C40F>-{reduction:F0}</color>";
+        string label = $"APPLY{costStr}";
+
+        var buttonUI = btn.GetComponent<AttributeButtonUI>();
+        if (buttonUI != null)
+        {
+            buttonUI.Setup(attr, label, attr.attributeColor, () => OnApplyButtonClicked(attr));
+        }
+        else
+        {
+            var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
+            var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
+            if (uiText != null) { uiText.text = $"Apply: {attr.displayName} (-{reduction:F0})"; uiText.supportRichText = true; }
+            if (uiButton != null) uiButton.onClick.AddListener(() => OnApplyButtonClicked(attr));
+
+            var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            if (tmpText != null) { tmpText.text = $"Apply: {attr.displayName} (-{reduction:F0})"; tmpText.richText = true; }
+        }
+    }
+
+    // ═══ Button Click Handlers ══════════════════════════════════════
+
+    private void OnTakeButtonClicked(AttributeSO attr)
+    {
+        if (_currentTarget == null) return;
+
+        bool wasDefault = _currentTarget.IsDefaultAttribute(attr);
+        GameObject sourceObj = _currentTarget.gameObject;
+
+        AttributeSO taken = _currentTarget.RemoveAttribute(attr);
+        if (taken != null)
+        {
+            bool added = _inventory.AddAttribute(taken, sourceObj, wasDefault);
+            if (!added)
+            {
+                _currentTarget.ApplyAttribute(taken);
+                Debug.Log("[InteractionSystem] Inventory full.");
+            }
+        }
+
+        // Refresh panel or close if nothing left to interact with
+        if (_currentTarget.AttributeCount == 0 && _inventory.Count == 0)
+            ClosePanel();
+        else
+            PopulatePanel();
+    }
+
+    private void OnApplyButtonClicked(AttributeSO attr)
+    {
+        if (_currentTarget == null) return;
+
+        if (!_currentTarget.CanAccept(attr))
+        {
+            Debug.Log($"[InteractionSystem] Cannot apply '{attr.displayName}' here.");
             return;
         }
 
-        AttributeSO selected = _inventory.GetSelected();
-        if (selected == null)
-        {
-            Debug.Log("[InteractionSystem] Inventory is empty.");
-            return;
-        }
-
-        bool applied = _currentTarget.ApplyAttribute(selected);
+        bool applied = _currentTarget.ApplyAttribute(attr);
         if (applied)
         {
-            _inventory.RemoveAttribute(selected);
+            _inventory.RemoveAttribute(attr);
+            _inventory.ClearTracking(attr);
+        }
+
+        PopulatePanel();
+    }
+
+    // ═══ Helpers ════════════════════════════════════════════════════
+
+    private void ClearContainer(Transform container)
+    {
+        if (container == null) return;
+        for (int i = container.childCount - 1; i >= 0; i--)
+        {
+            Destroy(container.GetChild(i).gameObject);
         }
     }
 }

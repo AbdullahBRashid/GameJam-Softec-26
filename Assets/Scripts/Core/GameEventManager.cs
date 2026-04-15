@@ -8,17 +8,31 @@ using UnityEngine;
 /// </summary>
 public static class GameEventManager
 {
-    // ─── Attribute Events ───────────────────────────────────────────
-    /// <summary>Fired when an attribute is applied to an object. Args: (AttributeSO, GameObject target)</summary>
+    // ─── Attribute Removal Events (Taking from objects) ─────────────
+    /// <summary>Fired when a DEFAULT attribute is removed from its home object. Args: (AttributeSO, GameObject source)</summary>
+    public static event Action<AttributeSO, GameObject> OnDefaultAttributeRemoved;
+
+    /// <summary>Fired when a FOREIGN (non-default) attribute is removed from an object. Args: (AttributeSO, GameObject source)</summary>
+    public static event Action<AttributeSO, GameObject> OnForeignAttributeRemoved;
+
+    // ─── Attribute Apply Events (Placing onto objects) ──────────────
+    /// <summary>Fired when an attribute is RESTORED to an object where it's a default. Args: (AttributeSO, GameObject target)</summary>
+    public static event Action<AttributeSO, GameObject> OnAttributeRestoredToDefault;
+
+    /// <summary>Fired when an attribute is applied to an object where it's NOT a default. Args: (AttributeSO, GameObject target)</summary>
+    public static event Action<AttributeSO, GameObject> OnAttributeAppliedToForeign;
+
+    // ─── General Attribute Events (for UI/audio, not volatility) ────
+    /// <summary>Fired on ANY attribute apply (for VFX/audio hooks). Args: (AttributeSO, GameObject target)</summary>
     public static event Action<AttributeSO, GameObject> OnAttributeApplied;
 
-    /// <summary>Fired when an attribute is removed from an object. Args: (AttributeSO, GameObject target)</summary>
+    /// <summary>Fired on ANY attribute remove (for VFX/audio hooks). Args: (AttributeSO, GameObject source)</summary>
     public static event Action<AttributeSO, GameObject> OnAttributeRemoved;
 
     /// <summary>Fired when the player picks up an attribute into inventory. Args: (AttributeSO)</summary>
     public static event Action<AttributeSO> OnAttributePickedUp;
 
-    /// <summary>Fired when the player drops an attribute from inventory. Args: (AttributeSO)</summary>
+    /// <summary>Fired when the player uses an attribute from inventory. Args: (AttributeSO)</summary>
     public static event Action<AttributeSO> OnAttributeDropped;
 
     // ─── Volatility Events ──────────────────────────────────────────
@@ -50,8 +64,30 @@ public static class GameEventManager
     public static event Action<bool> OnGravityReversed;
 
     // ═══ Invoke Methods ═════════════════════════════════════════════
-    // Each event gets a safe-invoke wrapper to prevent null-ref issues.
 
+    // -- Volatility-specific removal events --
+    public static void DefaultAttributeRemoved(AttributeSO attribute, GameObject source)
+    {
+        OnDefaultAttributeRemoved?.Invoke(attribute, source);
+    }
+
+    public static void ForeignAttributeRemoved(AttributeSO attribute, GameObject source)
+    {
+        OnForeignAttributeRemoved?.Invoke(attribute, source);
+    }
+
+    // -- Volatility-specific apply events --
+    public static void AttributeRestoredToDefault(AttributeSO attribute, GameObject target)
+    {
+        OnAttributeRestoredToDefault?.Invoke(attribute, target);
+    }
+
+    public static void AttributeAppliedToForeign(AttributeSO attribute, GameObject target)
+    {
+        OnAttributeAppliedToForeign?.Invoke(attribute, target);
+    }
+
+    // -- General (for VFX/audio, not volatility) --
     public static void AttributeApplied(AttributeSO attribute, GameObject target)
     {
         OnAttributeApplied?.Invoke(attribute, target);
@@ -114,6 +150,18 @@ public static class GameEventManager
 }
 
 // ─── Enums ──────────────────────────────────────────────────────────
+
+/// <summary>What kind of interactable object this is. Used for attribute compatibility.</summary>
+public enum ObjectCategory
+{
+    Any,            // Works on everything
+    PhysicsObject,  // Cubes, balls, movable objects
+    Door,           // Doors, gates
+    Light,          // Light fixtures, lamps
+    Platform,       // Moving platforms, floors
+    Player          // The player (future use)
+}
+
 /// <summary>Types of mechanical bugs the Volatility system can trigger.</summary>
 public enum MechanicalBugType
 {

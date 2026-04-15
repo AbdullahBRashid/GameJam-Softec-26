@@ -3,9 +3,15 @@ using UnityEngine;
 
 /// <summary>
 /// Reactive Volatility Manager (System A).
-/// Tracks a global volatility float (0–100).
-/// Attribute swaps and high inventory counts increase volatility.
-/// When thresholds are crossed, random "Mechanical Bugs" are triggered.
+/// Purely event-driven — NO time-based decay or inventory pressure.
+/// 
+/// Volatility Rules:
+///   Take default attribute from object     → +full cost
+///   Take foreign attribute from object     → +0
+///   Apply to object where it IS default    → −full cost (restore)
+///   Apply to object where it's NOT default → −half cost
+///
+/// When volatility exceeds the high threshold, mechanical bugs trigger.
 /// 
 /// Setup: Place on an empty GameObject named "VolatilityManager" in the scene.
 /// </summary>
@@ -17,23 +23,11 @@ public class VolatilityManager : MonoBehaviour
     [SerializeField] private float volatility = 0f;
     [SerializeField] private float maxVolatility = 100f;
 
-    [Tooltip("Volatility decays this much per second when idle.")]
-    [SerializeField] private float decayRate = 0.5f;
-
-    [Tooltip("Volatility gained per attribute swap on an object.")]
-    [SerializeField] private float swapCost = 5f;
-
-    [Tooltip("Volatility gained per attribute in inventory, per second.")]
-    [SerializeField] private float inventoryPressure = 1f;
-
     [Header("Thresholds")]
-    [Tooltip("Below this value, bugs can trigger (too stable — AI finds it suspicious).")]
-    [SerializeField] private float lowThreshold = 15f;
-
-    [Tooltip("Above this value, bugs trigger (too chaotic).")]
+    [Tooltip("Above this value, mechanical bugs start triggering.")]
     [SerializeField] private float highThreshold = 75f;
 
-    [Tooltip("Seconds between bug checks.")]
+    [Tooltip("Seconds between bug checks (only checked when in danger zone).")]
     [SerializeField] private float bugCheckInterval = 8f;
 
     [Header("Active Bugs")]
@@ -41,58 +35,47 @@ public class VolatilityManager : MonoBehaviour
 
     // ── Internal State ──
     private float _bugCheckTimer;
-    private int _currentInventoryCount;
     private readonly HashSet<MechanicalBugType> _activeBugs = new HashSet<MechanicalBugType>();
 
     // Read-only access
     public float Volatility => volatility;
+    public float MaxVolatility => maxVolatility;
     public float NormalizedVolatility => volatility / maxVolatility;
-    public bool IsInDangerZone => volatility >= highThreshold || volatility <= lowThreshold;
+    public bool IsInDangerZone => volatility >= highThreshold;
 
     private void Awake()
     {
-        // Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
         Instance = this;
+        volatility = 0f;
     }
 
     private void OnEnable()
     {
-        // Listen for attribute events to increase volatility
-        GameEventManager.OnAttributeApplied += HandleAttributeSwap;
-        GameEventManager.OnAttributeRemoved += HandleAttributeSwap;
-        GameEventManager.OnAttributePickedUp += HandleAttributePickup;
-        GameEventManager.OnAttributeDropped += HandleAttributeDrop;
+        // ── Subscribe to the 4 specific volatility events ──
+        GameEventManager.OnDefaultAttributeRemoved += HandleDefaultRemoved;
+        GameEventManager.OnForeignAttributeRemoved += HandleForeignRemoved;
+        GameEventManager.OnAttributeRestoredToDefault += HandleRestoredToDefault;
+        GameEventManager.OnAttributeAppliedToForeign += HandleAppliedToForeign;
     }
 
     private void OnDisable()
     {
-        GameEventManager.OnAttributeApplied -= HandleAttributeSwap;
-        GameEventManager.OnAttributeRemoved -= HandleAttributeSwap;
-        GameEventManager.OnAttributePickedUp -= HandleAttributePickup;
-        GameEventManager.OnAttributeDropped -= HandleAttributeDrop;
+        GameEventManager.OnDefaultAttributeRemoved -= HandleDefaultRemoved;
+        GameEventManager.OnForeignAttributeRemoved -= HandleForeignRemoved;
+        GameEventManager.OnAttributeRestoredToDefault -= HandleRestoredToDefault;
+        GameEventManager.OnAttributeAppliedToForeign -= HandleAppliedToForeign;
     }
 
     private void Update()
     {
-        // ── Inventory Pressure: high inventory count pushes volatility up ──
-        if (_currentInventoryCount > 0)
-        {
-            AddVolatility(_currentInventoryCount * inventoryPressure * Time.deltaTime);
-        }
+        // Only check for bugs periodically when in danger zone
+        if (!IsInDangerZone) return;
 
-        // ── Natural Decay ──
-        if (volatility > 0f)
-        {
-            float decayAmount = decayRate * Time.deltaTime;
-            AddVolatility(-decayAmount);
-        }
-
-        // ── Bug Check Timer ──
         _bugCheckTimer -= Time.deltaTime;
         if (_bugCheckTimer <= 0f)
         {
@@ -113,6 +96,7 @@ public class VolatilityManager : MonoBehaviour
         if (Mathf.Abs(delta) > 0.001f)
         {
             GameEventManager.VolatilityChanged(volatility, delta);
+            Debug.Log($"[VolatilityManager] Volatility: {previous:F1} → {volatility:F1} (Δ{delta:+0.0;-0.0})");
         }
     }
 
@@ -125,33 +109,44 @@ public class VolatilityManager : MonoBehaviour
 
     // ═══ Event Handlers ═════════════════════════════════════════════
 
-    private void HandleAttributeSwap(AttributeSO attr, GameObject target)
+    /// <summary>Default attribute removed from its home object → +full cost</summary>
+    private void HandleDefaultRemoved(AttributeSO attr, GameObject source)
     {
-        AddVolatility(attr != null ? attr.volatilityCost : swapCost);
+        float cost = attr != null ? attr.volatilityCost : 5f;
+        AddVolatility(cost);
+        Debug.Log($"[VolatilityManager] Default '{attr?.displayName}' removed from {source.name} → +{cost}");
     }
 
-    private void HandleAttributePickup(AttributeSO attr)
+    /// <summary>Foreign attribute removed from an object → no cost</summary>
+    private void HandleForeignRemoved(AttributeSO attr, GameObject source)
     {
-        _currentInventoryCount++;
-        AddVolatility(attr != null ? attr.volatilityCost * 0.5f : 2f);
+        // No volatility change for removing a foreign attribute
+        Debug.Log($"[VolatilityManager] Foreign '{attr?.displayName}' removed from {source.name} → +0 (free)");
     }
 
-    private void HandleAttributeDrop(AttributeSO attr)
+    /// <summary>Attribute restored to its default object → −full cost</summary>
+    private void HandleRestoredToDefault(AttributeSO attr, GameObject target)
     {
-        _currentInventoryCount = Mathf.Max(0, _currentInventoryCount - 1);
+        float cost = attr != null ? attr.volatilityCost : 5f;
+        AddVolatility(-cost);
+        Debug.Log($"[VolatilityManager] '{attr?.displayName}' restored to default on {target.name} → −{cost}");
+    }
+
+    /// <summary>Attribute applied to a non-default object → −half cost</summary>
+    private void HandleAppliedToForeign(AttributeSO attr, GameObject target)
+    {
+        float cost = attr != null ? attr.volatilityCost * 0.5f : 2.5f;
+        AddVolatility(-cost);
+        Debug.Log($"[VolatilityManager] '{attr?.displayName}' applied as foreign to {target.name} → −{cost}");
     }
 
     // ═══ Bug Logic ══════════════════════════════════════════════════
 
     private void EvaluateBugTrigger()
     {
-        if (!IsInDangerZone) return;
-
-        // Pick a random bug from the library
         MechanicalBugType[] bugLibrary = (MechanicalBugType[])System.Enum.GetValues(typeof(MechanicalBugType));
         MechanicalBugType chosen = bugLibrary[Random.Range(0, bugLibrary.Length)];
 
-        // Don't stack the same bug
         if (_activeBugs.Contains(chosen)) return;
 
         StartCoroutine(RunBug(chosen, bugDuration));
@@ -164,10 +159,8 @@ public class VolatilityManager : MonoBehaviour
         _activeBugs.Add(bug);
         Debug.Log($"[VolatilityManager] ⚠ Mechanical Bug TRIGGERED: {bug} (duration: {duration}s)");
 
-        // Fire the event — listeners (PlayerController, Environment) react
         GameEventManager.MechanicalBugTriggered(bug);
 
-        // Apply specific effects
         switch (bug)
         {
             case MechanicalBugType.InvertedControls:
@@ -180,7 +173,6 @@ public class VolatilityManager : MonoBehaviour
 
         yield return new WaitForSeconds(duration);
 
-        // Undo effects
         switch (bug)
         {
             case MechanicalBugType.InvertedControls:

@@ -88,7 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 236095cc49f85634e9607cd2e080e5c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  speed: 5
+  speed: 2
   gravity: -19.62
   jumpHeight: 2
 --- !u!114 &8524669896429625092
@@ -153,6 +153,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   interactPromptUI: {fileID: 0}
+  interactionPanel: {fileID: 0}
+  takeButtonContainer: {fileID: 0}
+  applyButtonContainer: {fileID: 0}
+  attributeButtonPrefab: {fileID: 0}
 --- !u!1 &7175596948067445962
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,7 +182,7 @@ Transform:
   m_GameObject: {fileID: 7175596948067445962}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.003, y: 1.653, z: 0.121}
+  m_LocalPosition: {x: 0.003, y: 1.653, z: 0.147}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

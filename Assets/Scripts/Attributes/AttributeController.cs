@@ -3,16 +3,23 @@ using UnityEngine;
 
 /// <summary>
 /// Place this component on any GameObject that can hold attributes.
-/// Manages the list of active attributes and delegates Apply/Remove
-/// to the corresponding IAttributeEffect implementations.
+/// Manages active attributes, default attributes, compatibility checks,
+/// and fires the correct volatility events.
 /// 
-/// Setup: Add to any interactable physics object alongside a Collider.
-///        Tag the GameObject as "AttributeReady".
+/// Setup: Add to any interactable object. Set the category and default attributes.
 /// </summary>
 public class AttributeController : MonoBehaviour
 {
+    [Header("Object Identity")]
+    [Tooltip("What type of object this is (for attribute compatibility).")]
+    [SerializeField] private ObjectCategory category = ObjectCategory.PhysicsObject;
+
+    [Header("Default Attributes")]
+    [Tooltip("Attributes this object spawns with. These are its 'home' attributes for volatility tracking.")]
+    [SerializeField] private List<AttributeSO> defaultAttributes = new List<AttributeSO>();
+
     [Header("Current Attributes")]
-    [Tooltip("Attributes currently active on this object.")]
+    [Tooltip("Attributes currently active on this object (auto-populated from defaults at Start).")]
     [SerializeField] private List<AttributeSO> activeAttributes = new List<AttributeSO>();
 
     [Header("Limits")]
@@ -27,21 +34,110 @@ public class AttributeController : MonoBehaviour
     private readonly Dictionary<string, IAttributeEffect> _liveEffects
         = new Dictionary<string, IAttributeEffect>();
 
+    // Track which default attributes have been removed (for volatility cost logic)
+    private readonly HashSet<string> _missingDefaults = new HashSet<string>();
+
     // ── Public Properties ───────────────────────────────────────────
+    public ObjectCategory Category => category;
     public IReadOnlyList<AttributeSO> ActiveAttributes => activeAttributes;
+    public IReadOnlyList<AttributeSO> DefaultAttributes => defaultAttributes;
     public int AttributeCount => activeAttributes.Count;
     public bool IsFull => activeAttributes.Count >= maxAttributes;
     public bool IsLocked => isLocked;
 
-    // ═══ Public API ═════════════════════════════════════════════════
+    // ═══ Lifecycle ══════════════════════════════════════════════════
+
+    private void Start()
+    {
+        InitializeDefaults();
+    }
+
+    /// <summary>
+    /// Apply all default attribute effects at scene start.
+    /// This makes objects start with their attributes visually/physically active.
+    /// Does NOT fire volatility events (these are the natural state).
+    /// </summary>
+    private void InitializeDefaults()
+    {
+        // Copy the default list into active (they should already be there from Inspector,
+        // but ensure consistency)
+        activeAttributes = new List<AttributeSO>(defaultAttributes);
+        _missingDefaults.Clear();
+
+        foreach (var attr in defaultAttributes)
+        {
+            if (attr == null) continue;
+
+            IAttributeEffect effect = AttributeEffectFactory.GetEffect(attr);
+            if (effect != null)
+            {
+                effect.Apply(gameObject, attr);
+                _liveEffects[attr.attributeID] = effect;
+            }
+        }
+
+        Debug.Log($"[AttributeController] {gameObject.name} initialized with {defaultAttributes.Count} default attributes.");
+    }
+
+    // ═══ Query Methods ══════════════════════════════════════════════
+
+    /// <summary>Is this attribute one of this object's defaults?</summary>
+    public bool IsDefaultAttribute(AttributeSO attribute)
+    {
+        if (attribute == null) return false;
+        foreach (var d in defaultAttributes)
+        {
+            if (d != null && d.attributeID == attribute.attributeID) return true;
+        }
+        return false;
+    }
+
+    /// <summary>Has a default attribute been removed from this object?</summary>
+    public bool IsMissingDefault(AttributeSO attribute)
+    {
+        return attribute != null && _missingDefaults.Contains(attribute.attributeID);
+    }
+
+    /// <summary>Check if this object has a specific attribute currently active.</summary>
+    public bool HasAttribute(AttributeSO attribute)
+    {
+        foreach (var a in activeAttributes)
+        {
+            if (a.attributeID == attribute.attributeID) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Check if this object can accept a given attribute.
+    /// Checks: compatibility, capacity, no duplicates.
+    /// </summary>
+    public bool CanAccept(AttributeSO attribute)
+    {
+        if (attribute == null) return false;
+        if (IsFull) return false;
+        if (HasAttribute(attribute)) return false;
+        if (!attribute.IsCompatibleWith(category)) return false;
+        return true;
+    }
+
+    // ═══ Apply / Remove API ═════════════════════════════════════════
 
     /// <summary>
     /// Apply an attribute to this object.
+    /// Fires the correct volatility event based on whether it's a default restoration or foreign apply.
     /// Returns true if successful.
     /// </summary>
     public bool ApplyAttribute(AttributeSO attribute)
     {
         if (attribute == null) return false;
+
+        // Check compatibility
+        if (!attribute.IsCompatibleWith(category))
+        {
+            Debug.LogWarning($"[AttributeController] '{attribute.displayName}' is not compatible with {category} object '{gameObject.name}'.");
+            return false;
+        }
 
         // Check capacity
         if (IsFull)
@@ -50,7 +146,7 @@ public class AttributeController : MonoBehaviour
             return false;
         }
 
-        // Don't duplicate the same attribute
+        // No duplicates
         if (HasAttribute(attribute))
         {
             Debug.LogWarning($"[AttributeController] {gameObject.name} already has '{attribute.displayName}'.");
@@ -65,21 +161,36 @@ public class AttributeController : MonoBehaviour
             return false;
         }
 
-        // Apply
+        // Apply the effect
         effect.Apply(gameObject, attribute);
         activeAttributes.Add(attribute);
         _liveEffects[attribute.attributeID] = effect;
 
-        // Fire global event (VolatilityManager listens to this)
+        // ── Fire the correct volatility event ──
+        bool isRestoringDefault = IsDefaultAttribute(attribute) && _missingDefaults.Contains(attribute.attributeID);
+
+        if (isRestoringDefault)
+        {
+            _missingDefaults.Remove(attribute.attributeID);
+            GameEventManager.AttributeRestoredToDefault(attribute, gameObject);
+            Debug.Log($"[AttributeController] ✔ '{attribute.displayName}' RESTORED to default on {gameObject.name}. (−full cost)");
+        }
+        else
+        {
+            GameEventManager.AttributeAppliedToForeign(attribute, gameObject);
+            Debug.Log($"[AttributeController] ✔ '{attribute.displayName}' applied as FOREIGN to {gameObject.name}. (−half cost)");
+        }
+
+        // General event (for VFX/audio hooks)
         GameEventManager.AttributeApplied(attribute, gameObject);
 
-        Debug.Log($"[AttributeController] ✔ '{attribute.displayName}' applied to {gameObject.name}. Count: {AttributeCount}/{maxAttributes}");
         return true;
     }
 
     /// <summary>
     /// Remove an attribute from this object.
-    /// Returns the removed AttributeSO (for adding to inventory), or null if failed.
+    /// Fires the correct volatility event based on whether it was a default attribute.
+    /// Returns the removed AttributeSO, or null if failed.
     /// </summary>
     public AttributeSO RemoveAttribute(AttributeSO attribute)
     {
@@ -87,7 +198,7 @@ public class AttributeController : MonoBehaviour
 
         if (isLocked)
         {
-            Debug.LogWarning($"[AttributeController] {gameObject.name} is LOCKED by the AI Director. Cannot remove '{attribute.displayName}'.");
+            Debug.LogWarning($"[AttributeController] {gameObject.name} is LOCKED. Cannot remove '{attribute.displayName}'.");
             GameEventManager.NarratorSpeak("Nice try. That one stays.", 3f);
             return null;
         }
@@ -98,7 +209,7 @@ public class AttributeController : MonoBehaviour
             return null;
         }
 
-        // Find and run the Remove logic
+        // Run the Remove effect
         if (_liveEffects.TryGetValue(attribute.attributeID, out IAttributeEffect effect))
         {
             effect.Remove(gameObject, attribute);
@@ -107,10 +218,24 @@ public class AttributeController : MonoBehaviour
 
         activeAttributes.Remove(attribute);
 
-        // Fire global event
+        // ── Fire the correct volatility event ──
+        bool wasDefault = IsDefaultAttribute(attribute);
+
+        if (wasDefault)
+        {
+            _missingDefaults.Add(attribute.attributeID);
+            GameEventManager.DefaultAttributeRemoved(attribute, gameObject);
+            Debug.Log($"[AttributeController] ✔ DEFAULT '{attribute.displayName}' removed from {gameObject.name}. (+full cost)");
+        }
+        else
+        {
+            GameEventManager.ForeignAttributeRemoved(attribute, gameObject);
+            Debug.Log($"[AttributeController] ✔ FOREIGN '{attribute.displayName}' removed from {gameObject.name}. (+0 cost)");
+        }
+
+        // General event (for VFX/audio hooks)
         GameEventManager.AttributeRemoved(attribute, gameObject);
 
-        Debug.Log($"[AttributeController] ✔ '{attribute.displayName}' removed from {gameObject.name}. Count: {AttributeCount}/{maxAttributes}");
         return attribute;
     }
 
@@ -119,16 +244,6 @@ public class AttributeController : MonoBehaviour
     {
         if (activeAttributes.Count == 0) return null;
         return RemoveAttribute(activeAttributes[0]);
-    }
-
-    /// <summary>Check if this object has a specific attribute.</summary>
-    public bool HasAttribute(AttributeSO attribute)
-    {
-        foreach (var a in activeAttributes)
-        {
-            if (a.attributeID == attribute.attributeID) return true;
-        }
-        return false;
     }
 
     // ═══ AI Director Controls ═══════════════════════════════════════

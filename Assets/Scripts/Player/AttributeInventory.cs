@@ -5,7 +5,8 @@ using UnityEngine;
 /// Player's attribute inventory. Holds attributes the player has "taken"
 /// from objects and can "apply" to other objects.
 /// 
-/// High inventory count increases the Volatility Meter via GameEventManager.
+/// Tracks the source object and whether the attribute was a default
+/// on that source, for correct volatility cost calculation.
 /// 
 /// Setup: Add to the Player GameObject alongside PlayerMovement.
 /// </summary>
@@ -13,9 +14,15 @@ public class AttributeInventory : MonoBehaviour
 {
     [Header("Inventory")]
     [Tooltip("Max number of attributes the player can carry.")]
-    [SerializeField] private int maxCapacity = 3;
+    [SerializeField] private int maxCapacity = 5;
 
     [SerializeField] private List<AttributeSO> inventory = new List<AttributeSO>();
+
+    // Track source info for each held attribute
+    private readonly Dictionary<AttributeSO, GameObject> _sourceMap
+        = new Dictionary<AttributeSO, GameObject>();
+    private readonly Dictionary<AttributeSO, bool> _wasDefaultMap
+        = new Dictionary<AttributeSO, bool>();
 
     // ── Public Properties ───────────────────────────────────────────
     public IReadOnlyList<AttributeSO> Items => inventory;
@@ -27,9 +34,10 @@ public class AttributeInventory : MonoBehaviour
 
     /// <summary>
     /// Add an attribute to the player's inventory.
+    /// Tracks source object and whether it was a default.
     /// Returns true if successful.
     /// </summary>
-    public bool AddAttribute(AttributeSO attribute)
+    public bool AddAttribute(AttributeSO attribute, GameObject source = null, bool wasDefault = false)
     {
         if (attribute == null) return false;
 
@@ -41,9 +49,15 @@ public class AttributeInventory : MonoBehaviour
         }
 
         inventory.Add(attribute);
+
+        if (source != null)
+            _sourceMap[attribute] = source;
+
+        _wasDefaultMap[attribute] = wasDefault;
+
         GameEventManager.AttributePickedUp(attribute);
 
-        Debug.Log($"[AttributeInventory] ✔ Picked up '{attribute.displayName}'. Inventory: {Count}/{maxCapacity}");
+        Debug.Log($"[AttributeInventory] ✔ Picked up '{attribute.displayName}' (wasDefault: {wasDefault}). Inventory: {Count}/{maxCapacity}");
         return true;
     }
 
@@ -58,18 +72,15 @@ public class AttributeInventory : MonoBehaviour
         inventory.Remove(attribute);
         GameEventManager.AttributeDropped(attribute);
 
-        Debug.Log($"[AttributeInventory] ✔ Dropped '{attribute.displayName}'. Inventory: {Count}/{maxCapacity}");
+        Debug.Log($"[AttributeInventory] ✔ Used '{attribute.displayName}'. Inventory: {Count}/{maxCapacity}");
         return attribute;
     }
 
-    /// <summary>
-    /// Remove attribute at a specific index (used by UI slot selection).
-    /// </summary>
+    /// <summary>Remove attribute at a specific index.</summary>
     public AttributeSO RemoveAt(int index)
     {
         if (index < 0 || index >= inventory.Count) return null;
-        AttributeSO attr = inventory[index];
-        return RemoveAttribute(attr);
+        return RemoveAttribute(inventory[index]);
     }
 
     /// <summary>Get the currently selected attribute (first in list).</summary>
@@ -93,5 +104,25 @@ public class AttributeInventory : MonoBehaviour
             if (a.attributeID == attribute.attributeID) return true;
         }
         return false;
+    }
+
+    /// <summary>Get the source GameObject this attribute was taken from.</summary>
+    public GameObject GetSource(AttributeSO attribute)
+    {
+        _sourceMap.TryGetValue(attribute, out GameObject source);
+        return source;
+    }
+
+    /// <summary>Was this attribute a default on its source object?</summary>
+    public bool WasDefault(AttributeSO attribute)
+    {
+        return _wasDefaultMap.TryGetValue(attribute, out bool v) && v;
+    }
+
+    /// <summary>Clear source/default tracking for an attribute (call after applying).</summary>
+    public void ClearTracking(AttributeSO attribute)
+    {
+        _sourceMap.Remove(attribute);
+        _wasDefaultMap.Remove(attribute);
     }
 }
