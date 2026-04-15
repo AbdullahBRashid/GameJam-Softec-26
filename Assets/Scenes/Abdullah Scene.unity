@@ -559,9 +559,10 @@ GameObject:
   - component: {fileID: 1180448851}
   - component: {fileID: 1180448850}
   - component: {fileID: 1180448854}
+  - component: {fileID: 1180448855}
   m_Layer: 6
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: AttributeReady
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -675,6 +676,33 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0eaad27b4eba3534e9fbf7392d8b2ad7, type: 2}
   maxAttributes: 3
   isLocked: 0
+--- !u!54 &1180448855
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180448849}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1297756383
 GameObject:
   m_ObjectHideFlags: 0
@@ -885,7 +913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a9e2acd9cf135846bde2edb66583de6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VolatilityManager
-  volatility: 0
+  volatility: 50
   maxVolatility: 100
   decayRate: 0.5
   swapCost: 5
@@ -956,11 +984,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b357574a1a0b734b878aea0ea97c494, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractionSystem
-  cameraTransform: {fileID: 0}
+  cameraTransform: {fileID: 330585546}
   interactRange: 4
   interactableLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   interactPromptUI: {fileID: 0}
 --- !u!114 &1694346120
 MonoBehaviour:
@@ -974,7 +1002,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f07d22158cf4243bbe3d4b20e06dfa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeInventory
-  maxCapacity: 3
+  maxCapacity: 5
   inventory: []
 --- !u!1 &1839705074
 GameObject:

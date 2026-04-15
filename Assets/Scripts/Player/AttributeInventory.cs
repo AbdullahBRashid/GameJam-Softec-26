@@ -5,7 +5,8 @@ using UnityEngine;
 /// Player's attribute inventory. Holds attributes the player has "taken"
 /// from objects and can "apply" to other objects.
 /// 
-/// High inventory count increases the Volatility Meter via GameEventManager.
+/// Tracks the SOURCE object each attribute came from so that
+/// returning it to the same object doesn't increase volatility.
 /// 
 /// Setup: Add to the Player GameObject alongside PlayerMovement.
 /// </summary>
@@ -17,6 +18,10 @@ public class AttributeInventory : MonoBehaviour
 
     [SerializeField] private List<AttributeSO> inventory = new List<AttributeSO>();
 
+    // Track which GameObject each attribute was taken from
+    private readonly Dictionary<AttributeSO, GameObject> _sourceMap
+        = new Dictionary<AttributeSO, GameObject>();
+
     // ── Public Properties ───────────────────────────────────────────
     public IReadOnlyList<AttributeSO> Items => inventory;
     public int Count => inventory.Count;
@@ -27,9 +32,10 @@ public class AttributeInventory : MonoBehaviour
 
     /// <summary>
     /// Add an attribute to the player's inventory.
+    /// Optionally track the source GameObject it came from.
     /// Returns true if successful.
     /// </summary>
-    public bool AddAttribute(AttributeSO attribute)
+    public bool AddAttribute(AttributeSO attribute, GameObject source = null)
     {
         if (attribute == null) return false;
 
@@ -41,6 +47,13 @@ public class AttributeInventory : MonoBehaviour
         }
 
         inventory.Add(attribute);
+
+        // Track where this attribute came from
+        if (source != null)
+        {
+            _sourceMap[attribute] = source;
+        }
+
         GameEventManager.AttributePickedUp(attribute);
 
         Debug.Log($"[AttributeInventory] ✔ Picked up '{attribute.displayName}'. Inventory: {Count}/{maxCapacity}");
@@ -56,6 +69,7 @@ public class AttributeInventory : MonoBehaviour
         if (attribute == null || !inventory.Contains(attribute)) return null;
 
         inventory.Remove(attribute);
+        // Don't clear source map yet — InteractionSystem needs it for the apply check
         GameEventManager.AttributeDropped(attribute);
 
         Debug.Log($"[AttributeInventory] ✔ Dropped '{attribute.displayName}'. Inventory: {Count}/{maxCapacity}");
@@ -93,5 +107,23 @@ public class AttributeInventory : MonoBehaviour
             if (a.attributeID == attribute.attributeID) return true;
         }
         return false;
+    }
+
+    /// <summary>
+    /// Get the source GameObject this attribute was taken from.
+    /// Returns null if unknown (e.g., spawned directly into inventory).
+    /// </summary>
+    public GameObject GetSource(AttributeSO attribute)
+    {
+        _sourceMap.TryGetValue(attribute, out GameObject source);
+        return source;
+    }
+
+    /// <summary>
+    /// Clear the source tracking for an attribute (call after applying).
+    /// </summary>
+    public void ClearSource(AttributeSO attribute)
+    {
+        _sourceMap.Remove(attribute);
     }
 }

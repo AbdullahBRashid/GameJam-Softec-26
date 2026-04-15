@@ -4,8 +4,9 @@ using UnityEngine;
 /// <summary>
 /// Reactive Volatility Manager (System A).
 /// Tracks a global volatility float (0–100).
-/// Attribute swaps and high inventory counts increase volatility.
-/// When thresholds are crossed, random "Mechanical Bugs" are triggered.
+/// Only APPLYING an attribute to a DIFFERENT object than its source increases volatility.
+/// Taking an attribute off and placing it back on the same object = net zero.
+/// Bugs only trigger when volatility exceeds the high threshold.
 /// 
 /// Setup: Place on an empty GameObject named "VolatilityManager" in the scene.
 /// </summary>
@@ -27,10 +28,7 @@ public class VolatilityManager : MonoBehaviour
     [SerializeField] private float inventoryPressure = 1f;
 
     [Header("Thresholds")]
-    [Tooltip("Below this value, bugs can trigger (too stable — AI finds it suspicious).")]
-    [SerializeField] private float lowThreshold = 15f;
-
-    [Tooltip("Above this value, bugs trigger (too chaotic).")]
+    [Tooltip("Above this value, mechanical bugs start triggering.")]
     [SerializeField] private float highThreshold = 75f;
 
     [Tooltip("Seconds between bug checks.")]
@@ -47,7 +45,7 @@ public class VolatilityManager : MonoBehaviour
     // Read-only access
     public float Volatility => volatility;
     public float NormalizedVolatility => volatility / maxVolatility;
-    public bool IsInDangerZone => volatility >= highThreshold || volatility <= lowThreshold;
+    public bool IsInDangerZone => volatility >= highThreshold;
 
     private void Awake()
     {
@@ -58,21 +56,23 @@ public class VolatilityManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // Ensure we start at 0
+        volatility = 0f;
     }
 
     private void OnEnable()
     {
-        // Listen for attribute events to increase volatility
-        GameEventManager.OnAttributeApplied += HandleAttributeSwap;
-        GameEventManager.OnAttributeRemoved += HandleAttributeSwap;
+        // Only listen to Apply events for volatility increase.
+        // Remove events do NOT increase volatility (taking off is free).
+        GameEventManager.OnAttributeApplied += HandleAttributeApplied;
         GameEventManager.OnAttributePickedUp += HandleAttributePickup;
         GameEventManager.OnAttributeDropped += HandleAttributeDrop;
     }
 
     private void OnDisable()
     {
-        GameEventManager.OnAttributeApplied -= HandleAttributeSwap;
-        GameEventManager.OnAttributeRemoved -= HandleAttributeSwap;
+        GameEventManager.OnAttributeApplied -= HandleAttributeApplied;
         GameEventManager.OnAttributePickedUp -= HandleAttributePickup;
         GameEventManager.OnAttributeDropped -= HandleAttributeDrop;
     }
@@ -125,15 +125,30 @@ public class VolatilityManager : MonoBehaviour
 
     // ═══ Event Handlers ═════════════════════════════════════════════
 
-    private void HandleAttributeSwap(AttributeSO attr, GameObject target)
+    /// <summary>
+    /// Only fires when an attribute is APPLIED to an object.
+    /// The InteractionSystem passes isReturningToSource=true via the event
+    /// when the player places an attribute back on its original object.
+    /// In that case, we don't charge volatility.
+    /// </summary>
+    private void HandleAttributeApplied(AttributeSO attr, GameObject target)
     {
+        // The InteractionSystem sets a flag on the VolatilityManager before applying
+        // if the attribute is returning to its source. Check that flag.
+        if (_skipNextApplyCost)
+        {
+            _skipNextApplyCost = false;
+            Debug.Log($"[VolatilityManager] Attribute returned to source — no volatility cost.");
+            return;
+        }
+
         AddVolatility(attr != null ? attr.volatilityCost : swapCost);
     }
 
     private void HandleAttributePickup(AttributeSO attr)
     {
         _currentInventoryCount++;
-        AddVolatility(attr != null ? attr.volatilityCost * 0.5f : 2f);
+        // Picking up does NOT add volatility — only inventory pressure over time.
     }
 
     private void HandleAttributeDrop(AttributeSO attr)
@@ -141,11 +156,27 @@ public class VolatilityManager : MonoBehaviour
         _currentInventoryCount = Mathf.Max(0, _currentInventoryCount - 1);
     }
 
+    // ═══ Source Tracking ═════════════════════════════════════════════
+    // The InteractionSystem calls MarkReturnToSource() before applying
+    // an attribute back to its original object.
+
+    private bool _skipNextApplyCost = false;
+
+    /// <summary>
+    /// Call this BEFORE applying an attribute to tell the VolatilityManager
+    /// that the next apply is a return-to-source (no volatility cost).
+    /// </summary>
+    public void MarkReturnToSource()
+    {
+        _skipNextApplyCost = true;
+    }
+
     // ═══ Bug Logic ══════════════════════════════════════════════════
 
     private void EvaluateBugTrigger()
     {
-        if (!IsInDangerZone) return;
+        // Only trigger bugs when volatility exceeds the high threshold
+        if (volatility < highThreshold) return;
 
         // Pick a random bug from the library
         MechanicalBugType[] bugLibrary = (MechanicalBugType[])System.Enum.GetValues(typeof(MechanicalBugType));
