@@ -108,4 +108,21 @@ public class PlayerMovement : MonoBehaviour
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("verticalVelocity", velocity.y);
     }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // Only bounce if we land on top of the object
+        if (hit.normal.y > 0.5f)
+        {
+            // Check if the surface has a physics material with bounciness
+            if (hit.collider.sharedMaterial != null && hit.collider.sharedMaterial.bounciness > 0.1f)
+            {
+                float bounciness = hit.collider.sharedMaterial.bounciness;
+                float bounceHeight = 8f * bounciness; // High bounce for max bounciness
+
+                float jumpDir = _gravityReversed ? -1f : 1f;
+                velocity.y = jumpDir * Mathf.Sqrt(bounceHeight * 2f * Mathf.Abs(gravity));
+            }
+        }
+    }
 }

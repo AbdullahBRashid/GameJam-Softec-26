@@ -218,20 +218,25 @@ public class InteractionSystem : MonoBehaviour
         GameObject btn = Object.Instantiate(attributeButtonPrefab, takeButtonContainer);
         btn.name = $"Take_{attr.displayName}";
 
+        // Calculate cost info for taking this attribute
+        bool isDefault = _currentTarget.IsDefaultAttribute(attr);
+        string costStr = isDefault ? $"  <color=#F05545>+{attr.volatilityCost:F0}</color>" : "  <color=#888888>+0</color>";
+        string label = $"TAKE{costStr}";
+
         var buttonUI = btn.GetComponent<AttributeButtonUI>();
         if (buttonUI != null)
         {
-            buttonUI.Setup(attr, "TAKE", attr.attributeColor, () => OnTakeButtonClicked(attr));
+            buttonUI.Setup(attr, label, attr.attributeColor, () => OnTakeButtonClicked(attr));
         }
         else
         {
             var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
             var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
-            if (uiText != null) uiText.text = $"Take: {attr.displayName}";
+            if (uiText != null) { uiText.text = $"Take: {attr.displayName} ({(isDefault ? "+" + attr.volatilityCost : "+0")})"; uiText.supportRichText = true; }
             if (uiButton != null) uiButton.onClick.AddListener(() => OnTakeButtonClicked(attr));
 
             var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            if (tmpText != null) tmpText.text = $"Take: {attr.displayName}";
+            if (tmpText != null) { tmpText.text = $"Take: {attr.displayName} ({(isDefault ? "+" + attr.volatilityCost : "+0")})"; tmpText.richText = true; }
         }
     }
 
@@ -242,20 +247,28 @@ public class InteractionSystem : MonoBehaviour
         GameObject btn = Object.Instantiate(attributeButtonPrefab, applyButtonContainer);
         btn.name = $"Apply_{attr.displayName}";
 
+        // Calculate cost info for applying this attribute
+        bool isRestoring = _currentTarget.IsDefaultAttribute(attr) && _currentTarget.IsMissingDefault(attr);
+        float reduction = isRestoring ? attr.volatilityCost : attr.volatilityCost * 0.5f;
+        string costStr = isRestoring
+            ? $"  <color=#2ECC71>-{reduction:F0}</color>"
+            : $"  <color=#F1C40F>-{reduction:F0}</color>";
+        string label = $"APPLY{costStr}";
+
         var buttonUI = btn.GetComponent<AttributeButtonUI>();
         if (buttonUI != null)
         {
-            buttonUI.Setup(attr, "APPLY", attr.attributeColor, () => OnApplyButtonClicked(attr));
+            buttonUI.Setup(attr, label, attr.attributeColor, () => OnApplyButtonClicked(attr));
         }
         else
         {
             var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
             var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
-            if (uiText != null) uiText.text = $"Apply: {attr.displayName}";
+            if (uiText != null) { uiText.text = $"Apply: {attr.displayName} (-{reduction:F0})"; uiText.supportRichText = true; }
             if (uiButton != null) uiButton.onClick.AddListener(() => OnApplyButtonClicked(attr));
 
             var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            if (tmpText != null) tmpText.text = $"Apply: {attr.displayName}";
+            if (tmpText != null) { tmpText.text = $"Apply: {attr.displayName} (-{reduction:F0})"; tmpText.richText = true; }
         }
     }
 
