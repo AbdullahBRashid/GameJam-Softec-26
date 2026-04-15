@@ -17,6 +17,11 @@ public class PlayerMovement : MonoBehaviour
     public float gravity = -25f; 
     public float jumpHeight = 1.5f;
 
+    // ── Volatility Bug State ──
+    private bool _controlsInverted = false;
+    private bool _gravityReversed = false;
+    private float _baseGravity;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -29,6 +34,34 @@ public class PlayerMovement : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         // Look for the animator on the child object
         anim = GetComponentInChildren<Animator>();
+        _baseGravity = gravity;
+    }
+
+    private void OnEnable()
+    {
+        // Subscribe to Volatility Bug events
+        GameEventManager.OnControlsInverted += HandleControlsInverted;
+        GameEventManager.OnGravityReversed += HandleGravityReversed;
+    }
+
+    private void OnDisable()
+    {
+        GameEventManager.OnControlsInverted -= HandleControlsInverted;
+        GameEventManager.OnGravityReversed -= HandleGravityReversed;
+    }
+
+    // ── Volatility Bug Handlers ──
+    private void HandleControlsInverted(bool inverted)
+    {
+        _controlsInverted = inverted;
+        Debug.Log($"[PlayerMovement] Controls inverted: {inverted}");
+    }
+
+    private void HandleGravityReversed(bool reversed)
+    {
+        _gravityReversed = reversed;
+        gravity = reversed ? Mathf.Abs(_baseGravity) : -Mathf.Abs(_baseGravity);
+        Debug.Log($"[PlayerMovement] Gravity reversed: {reversed} (gravity = {gravity})");
     }
 
     public void OnMove(InputValue value) => moveInput = value.Get<Vector2>();
@@ -38,7 +71,9 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded)
         {
             // Jump formula: v = sqrt(h * -2 * g)
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            // When gravity is reversed, jump downward
+            float jumpDir = _gravityReversed ? -1f : 1f;
+            velocity.y = jumpDir * Mathf.Sqrt(jumpHeight * 2f * Mathf.Abs(gravity));
         }
     }
 
@@ -46,13 +81,15 @@ public class PlayerMovement : MonoBehaviour
     {
         isGrounded = controller.isGrounded;
 
-        if (isGrounded && velocity.y < 0)
+        if (isGrounded && (_gravityReversed ? velocity.y > 0 : velocity.y < 0))
         {
-            velocity.y = -2f; // Keeps character glued to slopes
+            velocity.y = _gravityReversed ? 2f : -2f;
         }
 
-        // Calculate Movement
-        Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
+        // Calculate Movement (apply inversion if active)
+        float inputX = _controlsInverted ? -moveInput.x : moveInput.x;
+        float inputY = _controlsInverted ? -moveInput.y : moveInput.y;
+        Vector3 move = new Vector3(inputX, 0, inputY);
         // Transform move direction based on player's rotation
         move = transform.TransformDirection(move);
         
