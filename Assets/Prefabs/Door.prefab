@@ -100,9 +100,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3544251727342138095}
-  m_Layer: 0
+  - component: {fileID: 9185462922908140346}
+  - component: {fileID: 699590543848032905}
+  - component: {fileID: 3137495108233737909}
+  m_Layer: 6
   m_Name: Door
-  m_TagString: Untagged
+  m_TagString: AttributeReady
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -125,6 +128,64 @@ Transform:
   - {fileID: 1346863308327650324}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!114 &9185462922908140346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617580691958238880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 661acf40587f5d64e921fc97126e8580, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttributeController
+  category: 2
+  defaultAttributes:
+  - {fileID: 11400000, guid: 3690ae7f06718944185bdf159bb034ae, type: 2}
+  activeAttributes: []
+  maxAttributes: 3
+  isLocked: 0
+--- !u!114 &699590543848032905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617580691958238880}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26e79c9599cfb614db7d4e9f65ed0d78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DoorController
+  openAngle: 90
+  openSpeed: 3
+  useAnimator: 0
+  openTrigger: Open
+  closeTrigger: Close
+  openSound: {fileID: 0}
+  closeSound: {fileID: 0}
+--- !u!65 &3137495108233737909
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617580691958238880}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.2664528, y: 2.4470189, z: 0.27274704}
+  m_Center: {x: 1.1753788, y: 0.56606185, z: -0.54356956}
 --- !u!1 &3817736370780571174
 GameObject:
   m_ObjectHideFlags: 0

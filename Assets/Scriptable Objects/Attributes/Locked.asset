@@ -17,7 +17,7 @@ MonoBehaviour:
   description: Prevents doors and gates from opening.
   compatibleWith: 02000000
   isPhysicsAttribute: 0
-  attributeColor: {r: 0.8113208, g: 0.019134922, b: 0.019134922, a: 1}
+  attributeColor: {r: 0.5283019, g: 0.34712198, b: 0, a: 1}
   icon: {fileID: 0}
   vfxPrefab: {fileID: 0}
   applySound: {fileID: 0}

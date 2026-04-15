@@ -84,6 +84,34 @@ public class InteractionSystem : MonoBehaviour
         if (!_panelOpen)
         {
             PerformRaycast();
+
+            // Left mouse click toggles unlocked doors
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                TryToggleDoor();
+            }
+        }
+    }
+
+    /// <summary>
+    /// If looking at a door, open it (only if unlocked) or close it with left click.
+    /// </summary>
+    private void TryToggleDoor()
+    {
+        if (_currentTarget == null) return;
+
+        DoorController door = _currentTarget.GetComponent<DoorController>();
+        if (door == null || !door.CanInteract) return;
+
+        if (door.IsOpen)
+        {
+            // Always allow closing
+            door.CloseDoor();
+        }
+        else if (door.enabled && !HasLockedAttribute(_currentTarget))
+        {
+            // Only allow opening if unlocked
+            door.OpenDoor();
         }
     }
 
@@ -142,6 +170,16 @@ public class InteractionSystem : MonoBehaviour
         OpenPanel();
     }
 
+    /// <summary>Check if the target currently has a "locked" attribute active.</summary>
+    private bool HasLockedAttribute(AttributeController controller)
+    {
+        foreach (var attr in controller.ActiveAttributes)
+        {
+            if (attr.attributeID.ToLower() == "locked") return true;
+        }
+        return false;
+    }
+
     // ═══ Panel UI ═══════════════════════════════════════════════════
 
     private void OpenPanel()
@@ -190,7 +228,10 @@ public class InteractionSystem : MonoBehaviour
         ClearContainer(applyButtonContainer);
 
         // ── TAKE section: show object's attributes ──
-        if (_currentTarget != null && !_currentTarget.IsLocked)
+        // Note: we always show take buttons. The "locked" attribute should be
+        // removable by the player. The AI Director lock (IsLocked) only blocks
+        // inside RemoveAttribute() and shows a narrator message there.
+        if (_currentTarget != null)
         {
             foreach (var attr in _currentTarget.ActiveAttributes)
             {
