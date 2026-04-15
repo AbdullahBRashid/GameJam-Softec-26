@@ -27,13 +27,15 @@ public static class AttributeEffectFactory
         // ── Register new attribute types here ──
         IAttributeEffect effect = id switch
         {
-            "bouncy"       => new BouncyAttribute(),
+            "bouncy"        => new BouncyAttribute(),
             "frictionless"  => new FrictionlessAttribute(),
-            "heavy"        => new HeavyAttribute(),
+            "heavy"         => new HeavyAttribute(),
+            "locked"        => new LockedAttribute(),
             // Add more here as you create new effects:
-            // "magnetic"  => new MagneticAttribute(),
-            // "explosive" => new ExplosiveAttribute(),
-            _              => null
+            // "magnetic"   => new MagneticAttribute(),
+            // "explosive"  => new ExplosiveAttribute(),
+            // "dimmed"     => new DimmedAttribute(),
+            _               => null
         };
 
         if (effect != null)
