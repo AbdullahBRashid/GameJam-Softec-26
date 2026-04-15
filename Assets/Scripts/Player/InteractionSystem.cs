@@ -3,12 +3,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Raycast-based interaction system with UI selection support.
-/// Detects objects with an AttributeController and opens a selection panel
-/// for Taking or Applying attributes.
-/// 
-/// Pressing Interact (E) opens the interaction panel for the targeted object.
-/// The panel shows available attributes to take and compatible attributes to apply.
+/// Raycast-based interaction system with UI selection panel.
+/// Press Interact (E) to open the panel when looking at an interactable.
+/// Press E again to close it. Camera and movement freeze while panel is open.
 ///
 /// Setup: Add to the Player GameObject.
 ///        Assign the Camera transform in the Inspector.
@@ -49,9 +46,14 @@ public class InteractionSystem : MonoBehaviour
     private AttributeController _currentTarget;
     private bool _panelOpen = false;
 
+    // ── Components to disable when panel is open ──
+    private PlayerMovement _playerMovement;
+    private MonoBehaviour _cinemachineInputController;
+
     private void Awake()
     {
         _inventory = GetComponent<AttributeInventory>();
+        _playerMovement = GetComponent<PlayerMovement>();
 
         if (cameraTransform == null)
         {
@@ -61,6 +63,20 @@ public class InteractionSystem : MonoBehaviour
 
         if (interactionPanel != null)
             interactionPanel.SetActive(false);
+    }
+
+    private void Start()
+    {
+        // Find the Cinemachine input controller in the scene to disable it during interaction
+        // CinemachineInputAxisController is the component that reads mouse input for camera look
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mb.GetType().Name == "CinemachineInputAxisController")
+            {
+                _cinemachineInputController = mb;
+                break;
+            }
+        }
     }
 
     private void Update()
@@ -95,11 +111,10 @@ public class InteractionSystem : MonoBehaviour
         if (interactPromptUI != null) interactPromptUI.SetActive(false);
     }
 
-    // ═══ Input Callbacks (New Input System — Send Messages) ═════════
+    // ═══ Input Callback (New Input System — Send Messages) ══════════
 
     /// <summary>
-    /// INTERACT (E): Opens the interaction panel for the current target.
-    /// If no panel is assigned, falls back to quick-take behavior.
+    /// INTERACT (E): Opens/closes the interaction panel for the current target.
     /// </summary>
     public void OnTake(InputValue value)
     {
@@ -118,86 +133,13 @@ public class InteractionSystem : MonoBehaviour
             return;
         }
 
-        // If we have a UI panel, open it
-        if (interactionPanel != null && attributeButtonPrefab != null)
+        if (interactionPanel == null || attributeButtonPrefab == null)
         {
-            OpenPanel();
-        }
-        else
-        {
-            // Fallback: quick-take first attribute
-            QuickTake();
-        }
-    }
-
-    /// <summary>
-    /// APPLY (Q): Quick-apply selected inventory attribute to target.
-    /// Used as a shortcut when the panel isn't open.
-    /// </summary>
-    public void OnApply(InputValue value)
-    {
-        if (!value.isPressed) return;
-        if (_panelOpen) return; // Use panel buttons instead
-
-        if (_currentTarget == null)
-        {
-            Debug.Log("[InteractionSystem] No target in range.");
+            Debug.LogWarning("[InteractionSystem] Interaction Panel or Button Prefab not assigned!");
             return;
         }
 
-        QuickApply();
-    }
-
-    // ═══ Quick Actions (No Panel) ═══════════════════════════════════
-
-    private void QuickTake()
-    {
-        if (_currentTarget.AttributeCount == 0)
-        {
-            Debug.Log("[InteractionSystem] Target has no attributes to take.");
-            return;
-        }
-
-        // Take the first attribute
-        AttributeSO first = _currentTarget.ActiveAttributes[0];
-        bool wasDefault = _currentTarget.IsDefaultAttribute(first);
-        GameObject sourceObj = _currentTarget.gameObject;
-
-        AttributeSO taken = _currentTarget.RemoveAttribute(first);
-        if (taken != null)
-        {
-            bool added = _inventory.AddAttribute(taken, sourceObj, wasDefault);
-            if (!added)
-            {
-                // Inventory full — put it back
-                _currentTarget.ApplyAttribute(taken);
-                Debug.Log("[InteractionSystem] Inventory full. Attribute returned to object.");
-            }
-        }
-    }
-
-    private void QuickApply()
-    {
-        AttributeSO selected = _inventory.GetSelected();
-        if (selected == null)
-        {
-            Debug.Log("[InteractionSystem] Inventory is empty.");
-            return;
-        }
-
-        if (!_currentTarget.CanAccept(selected))
-        {
-            Debug.Log($"[InteractionSystem] '{selected.displayName}' cannot be applied to {_currentTarget.gameObject.name}.");
-            GameEventManager.NarratorSpeak($"That doesn't belong there.", 3f);
-            return;
-        }
-
-        bool applied = _currentTarget.ApplyAttribute(selected);
-        if (applied)
-        {
-            _inventory.RemoveAttribute(selected);
-            _inventory.ClearTracking(selected);
-        }
+        OpenPanel();
     }
 
     // ═══ Panel UI ═══════════════════════════════════════════════════
@@ -207,9 +149,17 @@ public class InteractionSystem : MonoBehaviour
         _panelOpen = true;
         interactionPanel.SetActive(true);
 
-        // Unlock cursor so the player can click buttons
+        // Unlock cursor for UI interaction
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        // Freeze player movement
+        if (_playerMovement != null)
+            _playerMovement.enabled = false;
+
+        // Freeze camera panning
+        if (_cinemachineInputController != null)
+            _cinemachineInputController.enabled = false;
 
         PopulatePanel();
     }
@@ -223,6 +173,14 @@ public class InteractionSystem : MonoBehaviour
         // Re-lock cursor for FPS controls
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // Re-enable player movement
+        if (_playerMovement != null)
+            _playerMovement.enabled = true;
+
+        // Re-enable camera panning
+        if (_cinemachineInputController != null)
+            _cinemachineInputController.enabled = true;
     }
 
     private void PopulatePanel()
@@ -260,7 +218,6 @@ public class InteractionSystem : MonoBehaviour
         GameObject btn = Object.Instantiate(attributeButtonPrefab, takeButtonContainer);
         btn.name = $"Take_{attr.displayName}";
 
-        // Set up the button visuals
         var buttonUI = btn.GetComponent<AttributeButtonUI>();
         if (buttonUI != null)
         {
@@ -268,13 +225,11 @@ public class InteractionSystem : MonoBehaviour
         }
         else
         {
-            // Fallback: use Unity Button + Text
             var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
             var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
             if (uiText != null) uiText.text = $"Take: {attr.displayName}";
             if (uiButton != null) uiButton.onClick.AddListener(() => OnTakeButtonClicked(attr));
 
-            // Also try TextMeshPro
             var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
             if (tmpText != null) tmpText.text = $"Take: {attr.displayName}";
         }
@@ -324,11 +279,11 @@ public class InteractionSystem : MonoBehaviour
             }
         }
 
-        // Refresh panel or close if nothing left
+        // Refresh panel or close if nothing left to interact with
         if (_currentTarget.AttributeCount == 0 && _inventory.Count == 0)
             ClosePanel();
         else
-            PopulatePanel(); // Refresh
+            PopulatePanel();
     }
 
     private void OnApplyButtonClicked(AttributeSO attr)
@@ -348,7 +303,6 @@ public class InteractionSystem : MonoBehaviour
             _inventory.ClearTracking(attr);
         }
 
-        // Refresh panel
         PopulatePanel();
     }
 
