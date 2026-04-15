@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff3ae8ad3a8e8fb4ba4f53f91cfe5c8a, type: 3}
+  m_Name: Bouncy
+  m_EditorClassIdentifier: Assembly-CSharp::AttributeSO
+  attributeID: bouncy
+  displayName: Bouncy
+  description: Makes surfaces springy. Objects bounce off with high energy.
+  attributeColor: {r: 0.13919187, g: 1, b: 0, a: 1}
+  icon: {fileID: 0}
+  vfxPrefab: {fileID: 0}
+  applySound: {fileID: 0}
+  removeSound: {fileID: 0}
+  physicsMaterial: {fileID: 13400000, guid: bad54bafe4b4c284880d1468787d3438, type: 2}
+  volatilityCost: 5
+  canBeLocked: 1

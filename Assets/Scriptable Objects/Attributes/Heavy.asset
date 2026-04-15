@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff3ae8ad3a8e8fb4ba4f53f91cfe5c8a, type: 3}
+  m_Name: Heavy
+  m_EditorClassIdentifier: Assembly-CSharp::AttributeSO
+  attributeID: heavy
+  displayName: Heavy
+  description: Increases mass dramatically. Objects become immovable anchors.
+  attributeColor: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
+  icon: {fileID: 0}
+  vfxPrefab: {fileID: 0}
+  applySound: {fileID: 0}
+  removeSound: {fileID: 0}
+  physicsMaterial: {fileID: 0}
+  volatilityCost: 8
+  canBeLocked: 1
