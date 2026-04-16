@@ -124,5 +124,23 @@ public class PlayerMovement : MonoBehaviour
                 velocity.y = jumpDir * Mathf.Sqrt(bounceHeight * 2f * Mathf.Abs(gravity));
             }
         }
+
+        // Lava damage check
+        LavaHazard hazard = hit.gameObject.GetComponent<LavaHazard>();
+        if (hazard != null)
+        {
+            PlayerHealth health = GetComponent<PlayerHealth>();
+            if (health != null)
+            {
+                health.TakeDamage(hazard.damagePerTick);
+            }
+        }
+
+        // Heal station check
+        HealStation healObj = hit.gameObject.GetComponent<HealStation>();
+        if (healObj != null)
+        {
+            healObj.HealPlayer(gameObject);
+        }
     }
 }

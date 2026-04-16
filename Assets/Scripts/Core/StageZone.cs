@@ -25,16 +25,22 @@ public class StageZone : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        CheckForPlayer(other);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        CheckForPlayer(other);
+    }
+
+    private void CheckForPlayer(Collider other)
+    {
+        // Try getting PlayerMovement to bypass tag dependency problems
+        if (other.GetComponent<PlayerMovement>() != null)
         {
-            // Register with StageManager
-            if (StageManager.Instance != null)
+            if (StageManager.Instance != null && StageManager.Instance.CurrentStageIndex != stageIndex)
             {
                 StageManager.Instance.EnterStage(this);
-            }
-            else
-            {
-                Debug.LogWarning($"[StageZone] Reached stage {stageIndex} but no StageManager found in scene!");
             }
         }
     }

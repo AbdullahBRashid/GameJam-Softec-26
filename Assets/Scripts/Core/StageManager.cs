@@ -31,6 +31,9 @@ public class StageManager : MonoBehaviour
     public int CurrentStageIndex => currentStageIndex;
     public int FurthestStage => furthestStageReached;
 
+    private Vector3 _initialSpawnPos;
+    private Quaternion _initialSpawnRot;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -42,6 +45,12 @@ public class StageManager : MonoBehaviour
 
         if (player == null)
             player = GameObject.FindWithTag("Player");
+
+        if (player != null)
+        {
+            _initialSpawnPos = player.transform.position;
+            _initialSpawnRot = player.transform.rotation;
+        }
     }
 
     private void Start()
@@ -154,22 +163,24 @@ public class StageManager : MonoBehaviour
         if (player == null) return;
 
         // 1. Move player to spawn
+        var cc = player.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
         if (_stageZones.TryGetValue(currentStageIndex, out StageZone zone) && zone.spawnPoint != null)
         {
-            // Temporarily disable CharacterController for teleporting
-            var cc = player.GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
-            
             player.transform.position = zone.spawnPoint.position;
             player.transform.rotation = zone.spawnPoint.rotation;
-            
-            if (cc != null) cc.enabled = true;
             Debug.Log($"[StageManager] Player respawned at {zone.stageName}.");
         }
         else
         {
-            Debug.LogWarning($"[StageManager] No spawn point found for stage {currentStageIndex}!");
+            Debug.LogWarning($"[StageManager] No spawn point found for stage {currentStageIndex}! Using initial spawn point.");
+            player.transform.position = _initialSpawnPos;
+            player.transform.rotation = _initialSpawnRot;
         }
+
+        if (cc != null) cc.enabled = true;
+        Physics.SyncTransforms(); // Ensures the teleport registers with the physics engine immediately
 
         // 2. Restore all object states
         foreach (var obj in _allObjects)
@@ -201,9 +212,8 @@ public class StageManager : MonoBehaviour
 
     private void HandlePlayerDied()
     {
-        Debug.Log("[StageManager] Player died. Triggering respawn sequence...");
-        // Delay could be added here for a death animation
-        RespawnPlayer();
+        Debug.Log("[StageManager] Player died. Awaiting UI retry...");
+        // RespawnPlayer() is now called from DeathScreenUI.cs when the player clicks Retry.
     }
 
     /// <summary>

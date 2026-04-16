@@ -48,12 +48,14 @@ public class InteractionSystem : MonoBehaviour
 
     // ── Components to disable when panel is open ──
     private PlayerMovement _playerMovement;
+    private PlayerInput _playerInput;
     private MonoBehaviour _cinemachineInputController;
 
     private void Awake()
     {
         _inventory = GetComponent<AttributeInventory>();
         _playerMovement = GetComponent<PlayerMovement>();
+        _playerInput = GetComponent<PlayerInput>();
 
         if (cameraTransform == null)
         {
@@ -191,9 +193,14 @@ public class InteractionSystem : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        if (_playerInput != null)
+            _playerInput.DeactivateInput();
+
         // Freeze player movement
         if (_playerMovement != null)
+        {
             _playerMovement.enabled = false;
+        }
 
         // Freeze camera panning
         if (_cinemachineInputController != null)
@@ -211,6 +218,9 @@ public class InteractionSystem : MonoBehaviour
         // Re-lock cursor for FPS controls
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (_playerInput != null)
+            _playerInput.ActivateInput();
 
         // Re-enable player movement
         if (_playerMovement != null)
