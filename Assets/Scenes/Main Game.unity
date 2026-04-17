@@ -7503,11 +7503,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 407576708}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &409546899 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 665345490014710209, guid: fed92ee0dbc945e43b9b526f1fa204a7, type: 3}
-  m_PrefabInstance: {fileID: 1583168521}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &410041141
 GameObject:
   m_ObjectHideFlags: 0
@@ -18885,42 +18880,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4193960294874199052, guid: fed92ee0dbc945e43b9b526f1fa204a7, type: 3}
   m_PrefabInstance: {fileID: 1583168521}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 409546899}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
---- !u!114 &937505740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 409546899}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca7de3aefa901374ba29464584a3109a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineDecollider
-  CameraRadius: 0.01
-  Decollision:
-    Enabled: 1
-    ObstacleLayers:
-      serializedVersion: 2
-      m_Bits: 1
-    UseFollowTarget:
-      Enabled: 0
-      YOffset: 0
-    Damping: 0.5
-    SmoothingTime: 0
-  TerrainResolution:
-    Enabled: 1
-    TerrainLayers:
-      serializedVersion: 2
-      m_Bits: 1
-    MaximumRaycast: 10
-    Damping: 0.5
 --- !u!1 &943094438
 GameObject:
   m_ObjectHideFlags: 0
@@ -31816,10 +31781,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 665345490014710209, guid: fed92ee0dbc945e43b9b526f1fa204a7, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 937505740}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fed92ee0dbc945e43b9b526f1fa204a7, type: 3}
 --- !u!1 &1585464819
 GameObject:
