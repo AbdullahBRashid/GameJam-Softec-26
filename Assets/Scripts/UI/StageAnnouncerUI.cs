@@ -38,12 +38,12 @@ public class StageAnnouncerUI : MonoBehaviour
         GameEventManager.OnStageEntered -= HandleStageEntered;
     }
 
-    private void HandleStageEntered(int stageIndex)
+    private void HandleStageEntered(int stageIndex, string stageName)
     {
         if (stageText == null || canvasGroup == null) return;
 
-        // Using a 1-based index for player display, or whatever the level designer used.
-        stageText.text = $"STAGE {stageIndex}";
+        // Use the descriptive stage name provided by the zone
+        stageText.text = stageName.ToUpper();
 
         if (_fadeCoroutine != null)
         {

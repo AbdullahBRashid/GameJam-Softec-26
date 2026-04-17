@@ -111,11 +111,7 @@ public class InventoryHUD : MonoBehaviour
         RectTransform slotRT = slotObj.AddComponent<RectTransform>();
         slotRT.sizeDelta = new Vector2(slotWidth, slotHeight);
         Image slotBg = slotObj.AddComponent<Image>();
-        Color tintedBg = _slotBg;
-        tintedBg.r = Mathf.Lerp(tintedBg.r, attr.attributeColor.r, 0.08f);
-        tintedBg.g = Mathf.Lerp(tintedBg.g, attr.attributeColor.g, 0.08f);
-        tintedBg.b = Mathf.Lerp(tintedBg.b, attr.attributeColor.b, 0.08f);
-        slotBg.color = tintedBg;
+        slotBg.color = _slotBg; // Sleek dark solid color, no dynamic tint
         slotBg.raycastTarget = false;
 
         // ── Color Strip (left edge) ──
@@ -128,7 +124,7 @@ public class InventoryHUD : MonoBehaviour
         stripRT.anchoredPosition = Vector2.zero;
         stripRT.sizeDelta = new Vector2(4f, 0);
         Image stripImg = strip.AddComponent<Image>();
-        stripImg.color = attr.attributeColor;
+        stripImg.color = new Color(0.25f, 0.25f, 0.28f, 1f); // Neutral gray accent strip
         stripImg.raycastTarget = false;
 
         // ── Name Text ──

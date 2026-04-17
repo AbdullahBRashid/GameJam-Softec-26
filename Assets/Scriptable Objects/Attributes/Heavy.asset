@@ -15,11 +15,13 @@ MonoBehaviour:
   attributeID: heavy
   displayName: Heavy
   description: Increases mass dramatically. Objects become immovable anchors.
+  compatibleWith: 00000000
+  isPhysicsAttribute: 1
   attributeColor: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
   icon: {fileID: 0}
   vfxPrefab: {fileID: 0}
   applySound: {fileID: 0}
   removeSound: {fileID: 0}
   physicsMaterial: {fileID: 0}
-  volatilityCost: 8
+  volatilityCost: 10
   canBeLocked: 1

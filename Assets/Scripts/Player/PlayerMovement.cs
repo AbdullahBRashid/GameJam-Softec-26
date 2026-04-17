@@ -32,6 +32,12 @@ public class PlayerMovement : MonoBehaviour
     private bool _controlsInverted = false;
     private bool _gravityReversed = false;
     private float _baseGravity;
+    
+    private bool _gravityDriftActive = false;
+    private Vector3 _gravityDriftVector = Vector3.zero;
+
+    private bool _inertiaCorruptionActive = false;
+    private Vector3 _horizontalVelocity;
 
     private void Start()
     {
@@ -53,12 +59,16 @@ public class PlayerMovement : MonoBehaviour
         // Subscribe to Volatility Bug events
         GameEventManager.OnControlsInverted += HandleControlsInverted;
         GameEventManager.OnGravityReversed += HandleGravityReversed;
+        GameEventManager.OnGravityDrift += HandleGravityDrift;
+        GameEventManager.OnInertiaCorruption += HandleInertiaCorruption;
     }
 
     private void OnDisable()
     {
         GameEventManager.OnControlsInverted -= HandleControlsInverted;
         GameEventManager.OnGravityReversed -= HandleGravityReversed;
+        GameEventManager.OnGravityDrift -= HandleGravityDrift;
+        GameEventManager.OnInertiaCorruption -= HandleInertiaCorruption;
     }
 
     // ── Volatility Bug Handlers ──
@@ -75,6 +85,18 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log($"[PlayerMovement] Gravity reversed: {reversed} (gravity = {gravity})");
     }
 
+    private void HandleGravityDrift(bool active)
+    {
+        _gravityDriftActive = active;
+        Debug.Log($"[PlayerMovement] Gravity Drift active: {active}");
+    }
+
+    private void HandleInertiaCorruption(bool active)
+    {
+        _inertiaCorruptionActive = active;
+        Debug.Log($"[PlayerMovement] Inertia Corruption active: {active}");
+    }
+
     public void OnMove(InputValue value) => moveInput = value.Get<Vector2>();
 
     public void OnJump()
@@ -85,7 +107,10 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        isGrounded = controller.isGrounded;
+        if (_gravityReversed)
+            isGrounded = (controller.collisionFlags & CollisionFlags.Above) != 0;
+        else
+            isGrounded = controller.isGrounded;
 
         if (isGrounded)
         {
@@ -116,19 +141,50 @@ public class PlayerMovement : MonoBehaviour
         // Calculate Movement (apply inversion if active)
         float inputX = _controlsInverted ? -moveInput.x : moveInput.x;
         float inputY = _controlsInverted ? -moveInput.y : moveInput.y;
-        Vector3 move = new Vector3(inputX, 0, inputY);
-        // Transform move direction based on player's rotation
-        move = transform.TransformDirection(move);
+        Vector3 targetMove = new Vector3(inputX, 0, inputY);
         
-        controller.Move(move * speed * Time.deltaTime);
+        // Transform move direction based on player's rotation
+        targetMove = transform.TransformDirection(targetMove) * speed;
 
-        // Gravity
+        // ── Inertia Corruption (Ice Rink) ──
+        if (_inertiaCorruptionActive)
+        {
+            // Drop friction dramatically: player lerps slowly toward input, preserving massive momentum
+            _horizontalVelocity = Vector3.MoveTowards(_horizontalVelocity, targetMove, speed * 0.8f * Time.deltaTime);
+        }
+        else
+        {
+            // Normal tight controls (if we just turned it off, this violently snaps them back to grip)
+            _horizontalVelocity = targetMove;
+        }
+
+        controller.Move(_horizontalVelocity * Time.deltaTime);
+
+        // ── Gravity Drift (Z-Axis Leak) ──
+        if (_gravityDriftActive)
+        {
+            // Gravity hallucinates and slowly pulls left/right/forward/back randomly
+            _gravityDriftVector.x = Mathf.Lerp(_gravityDriftVector.x, Random.Range(-15f, 15f), Time.deltaTime * 0.5f);
+            _gravityDriftVector.z = Mathf.Lerp(_gravityDriftVector.z, Random.Range(-15f, 15f), Time.deltaTime * 0.5f);
+            
+            velocity.x += _gravityDriftVector.x * Time.deltaTime;
+            velocity.z += _gravityDriftVector.z * Time.deltaTime;
+        }
+        else
+        {
+            // Decay horizontal gravity drift quickly back to zero
+            velocity.x = Mathf.Lerp(velocity.x, 0, Time.deltaTime * 5f);
+            velocity.z = Mathf.Lerp(velocity.z, 0, Time.deltaTime * 5f);
+        }
+
+        // Standard Gravity
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
         CheckFallDeath();
 
-        UpdateAnimator(move);
+        // Pass the actual physics-based sliding velocity to the animator so the player continues moving their legs if sliding
+        UpdateAnimator(_horizontalVelocity);
     }
 
     private void CheckFallDeath()

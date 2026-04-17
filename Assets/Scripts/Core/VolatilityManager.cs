@@ -31,7 +31,7 @@ public class VolatilityManager : MonoBehaviour
     [SerializeField] private float bugCheckInterval = 8f;
 
     [Header("Active Bugs")]
-    [SerializeField] private float bugDuration = 6f;
+    [SerializeField] private float bugDuration = 12f;
 
     // ── Internal State ──
     private float _bugCheckTimer;
@@ -100,6 +100,15 @@ public class VolatilityManager : MonoBehaviour
         }
     }
 
+    /// <summary>Hard-sets volatility to a specific value. Used for checkpoint restoration.</summary>
+    public void SetVolatility(float value)
+    {
+        float previous = volatility;
+        volatility = Mathf.Clamp(value, 0f, maxVolatility);
+        float delta = volatility - previous;
+        GameEventManager.VolatilityChanged(volatility, delta);
+    }
+
     /// <summary>Force-trigger a specific mechanical bug (used by AIDirector).</summary>
     public void ForceBug(MechanicalBugType bugType, float duration = -1f)
     {
@@ -117,11 +126,12 @@ public class VolatilityManager : MonoBehaviour
         Debug.Log($"[VolatilityManager] Default '{attr?.displayName}' removed from {source.name} → +{cost}");
     }
 
-    /// <summary>Foreign attribute removed from an object → no cost</summary>
+    /// <summary>Foreign attribute removed from an object → +half cost (reverting the discount!)</summary>
     private void HandleForeignRemoved(AttributeSO attr, GameObject source)
     {
-        // No volatility change for removing a foreign attribute
-        Debug.Log($"[VolatilityManager] Foreign '{attr?.displayName}' removed from {source.name} → +0 (free)");
+        float cost = attr != null ? attr.volatilityCost * 0.5f : 2.5f;
+        AddVolatility(cost);
+        Debug.Log($"[VolatilityManager] Foreign '{attr?.displayName}' removed from {source.name} → +{cost} (reverted)");
     }
 
     /// <summary>Attribute restored to its default object → −full cost</summary>
@@ -164,14 +174,37 @@ public class VolatilityManager : MonoBehaviour
         switch (bug)
         {
             case MechanicalBugType.InvertedControls:
+                GameEventManager.NarratorSpeak("WARNING: Neural link inverted.", 4f);
                 GameEventManager.ControlsInverted(true);
                 break;
             case MechanicalBugType.ReverseGravity:
+                GameEventManager.NarratorSpeak("WARNING: Gravity polarity reversed.", 4f);
                 GameEventManager.GravityReversed(true);
+                break;
+            case MechanicalBugType.GravityDrift:
+                GameEventManager.NarratorSpeak("WARNING: Local gravity anchor destabilizing.", 4f);
+                GameEventManager.GravityDrift(true);
+                break;
+            case MechanicalBugType.InertiaCorruption:
+                GameEventManager.NarratorSpeak("WARNING: Friction coefficient corrupted.", 4f);
+                GameEventManager.InertiaCorruption(true);
                 break;
         }
 
-        yield return new WaitForSeconds(duration);
+        // Yield loop instead of strict WaitForSeconds so we can instantly abort if the player stabilizes Volatility!
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            if (!IsInDangerZone)
+            {
+                Debug.Log($"[VolatilityManager] Volatility stabilized! Aborting bug: {bug}");
+                GameEventManager.NarratorSpeak("SYSTEM STABILIZED. Purging mechanical side effects.", 3f);
+                break;
+            }
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
 
         switch (bug)
         {
@@ -180,6 +213,12 @@ public class VolatilityManager : MonoBehaviour
                 break;
             case MechanicalBugType.ReverseGravity:
                 GameEventManager.GravityReversed(false);
+                break;
+            case MechanicalBugType.GravityDrift:
+                GameEventManager.GravityDrift(false);
+                break;
+            case MechanicalBugType.InertiaCorruption:
+                GameEventManager.InertiaCorruption(false);
                 break;
         }
 

@@ -20,6 +20,7 @@ public class StageManager : MonoBehaviour
 
     // Checkpoint Data
     private AttributeInventory.InventorySnapshot _inventoryCheckpoint;
+    private float _volatilityCheckpoint;
     private Dictionary<string, List<AttributeSO>> _objectSnapshots = new Dictionary<string, List<AttributeSO>>();
     
     // Track all attribute controllers in the scene to snapshot them
@@ -110,7 +111,7 @@ public class StageManager : MonoBehaviour
             SaveCheckpoint();
         }
 
-        GameEventManager.StageEntered(currentStageIndex);
+        GameEventManager.StageEntered(currentStageIndex, zone.stageName);
     }
 
     /// <summary>
@@ -124,6 +125,11 @@ public class StageManager : MonoBehaviour
         if (inventory != null)
         {
             _inventoryCheckpoint = inventory.GetSnapshot();
+        }
+
+        if (VolatilityManager.Instance != null)
+        {
+            _volatilityCheckpoint = VolatilityManager.Instance.Volatility;
         }
 
         _objectSnapshots.Clear();
@@ -165,6 +171,11 @@ public class StageManager : MonoBehaviour
             {
                 inventory.RestoreFromSnapshot(_inventoryCheckpoint);
             }
+        }
+
+        if (VolatilityManager.Instance != null)
+        {
+            VolatilityManager.Instance.SetVolatility(_volatilityCheckpoint);
         }
 
         Debug.Log($"[StageManager] Stage {currentStageIndex} reset to defaults.");
@@ -223,6 +234,12 @@ public class StageManager : MonoBehaviour
         if (health != null)
         {
             health.ResetHealth();
+        }
+
+        // 5. Restore Volatility
+        if (VolatilityManager.Instance != null)
+        {
+            VolatilityManager.Instance.SetVolatility(_volatilityCheckpoint);
         }
     }
 

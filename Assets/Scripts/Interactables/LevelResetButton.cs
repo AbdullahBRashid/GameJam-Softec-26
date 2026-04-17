@@ -34,7 +34,7 @@ public class LevelResetButton : MonoBehaviour
         GameEventManager.OnStageEntered -= HandleStageEntered;
     }
 
-    private void HandleStageEntered(int newStageIndex)
+    private void HandleStageEntered(int newStageIndex, string stageName)
     {
         // Disable the button if player has proceeded to a further stage.
         // Re-enable if they come back to this stage (or if they are currently here).

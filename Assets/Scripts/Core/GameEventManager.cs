@@ -63,6 +63,12 @@ public static class GameEventManager
     /// <summary>Fired when gravity should be reversed. Args: (bool isReversed)</summary>
     public static event Action<bool> OnGravityReversed;
 
+    /// <summary>Fired when gravity drift is toggled. Args: (bool isActive)</summary>
+    public static event Action<bool> OnGravityDrift;
+
+    /// <summary>Fired when inertia corruption (ice rink) is toggled. Args: (bool isActive)</summary>
+    public static event Action<bool> OnInertiaCorruption;
+
     // ─── Health Events ──────────────────────────────────────────────
     /// <summary>Fired when the player's health changes. Args: (int currentHealth, int maxHealth)</summary>
     public static event Action<int, int> OnPlayerHealthChanged;
@@ -75,8 +81,8 @@ public static class GameEventManager
     public static bool IsTimeRunning { get; private set; } = true;
 
     // ─── Stage Events ───────────────────────────────────────────────
-    /// <summary>Fired when the player enters a stage zone. Args: (int stageIndex)</summary>
-    public static event Action<int> OnStageEntered;
+    /// <summary>Fired when the player enters a stage zone. Args: (int stageIndex, string stageName)</summary>
+    public static event Action<int, string> OnStageEntered;
 
     /// <summary>Fired when a stage is reset by the player.</summary>
     public static event Action OnStageReset;
@@ -166,6 +172,16 @@ public static class GameEventManager
         OnGravityReversed?.Invoke(isReversed);
     }
 
+    public static void GravityDrift(bool isActive)
+    {
+        OnGravityDrift?.Invoke(isActive);
+    }
+
+    public static void InertiaCorruption(bool isActive)
+    {
+        OnInertiaCorruption?.Invoke(isActive);
+    }
+
     public static void PlayerHealthChanged(int current, int max)
     {
         OnPlayerHealthChanged?.Invoke(current, max);
@@ -182,9 +198,9 @@ public static class GameEventManager
         OnTimeStateChanged?.Invoke(isRunning);
     }
 
-    public static void StageEntered(int stageIndex)
+    public static void StageEntered(int stageIndex, string stageName)
     {
-        OnStageEntered?.Invoke(stageIndex);
+        OnStageEntered?.Invoke(stageIndex, stageName);
     }
 
     public static void StageReset()
@@ -211,6 +227,8 @@ public enum MechanicalBugType
 {
     InvertedControls,
     ReverseGravity,
+    GravityDrift,
+    InertiaCorruption,
     GravityToggleOnJump,
     MapDecay,
     CameraShake,

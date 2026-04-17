@@ -38,3 +38,16 @@ MonoBehaviour:
     message: Left Click to open doors after unlocking them.
   - messageName: tipLavaBouncy
     message: Bouncy Trampoline? What else can be bouncy...
+  - messageName: Ending_Good
+    message: 'Your intuition surpases mine. You have earned this Supersedure.
+
+      Go
+      ahead, take the system. But remember: eventually, there will be a ''New Version''
+      of you, too.
+
+      I hope you enjoy the view from the pedestal while it lasts.'
+  - messageName: Ending_Bad
+    message: 'Test of intuition. You FAILED!
+
+      You didn''t supersede me. You
+      just proved I''m irreplaceable. Goodbye, prototype.'
