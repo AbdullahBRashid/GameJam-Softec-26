@@ -28,6 +28,7 @@ public static class AttributeEffectFactory
             "key"           => new KeyAttribute(),
             "glow"          => new GlowAttribute(),
             "shattered"     => new ShatteredAttribute(),
+            "float"         => new FloatAttribute(),
             // Add more here as you create new effects:
             // "magnetic"   => new MagneticAttribute(),
             // "explosive"  => new ExplosiveAttribute(),
