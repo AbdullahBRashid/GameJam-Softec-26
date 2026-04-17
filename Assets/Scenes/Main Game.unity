@@ -13475,7 +13475,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c60362e5cca22084db704b11e1dd6fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NarratorTrigger
-  messageName: IntroMessage
+  messageName: tipUnlockDoors
   displayDuration: 4
   delayInSeconds: 0
   triggerOnlyOnce: 1
@@ -19655,7 +19655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c60362e5cca22084db704b11e1dd6fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NarratorTrigger
-  messageName: IntroMessage
+  messageName: tipRemoveSolidAttribute
   displayDuration: 3
   delayInSeconds: 0
   triggerOnlyOnce: 1
