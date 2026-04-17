@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,6 +24,8 @@ public class AttributeInventory : MonoBehaviour
         = new Dictionary<AttributeSO, GameObject>();
     private readonly Dictionary<AttributeSO, bool> _wasDefaultMap
         = new Dictionary<AttributeSO, bool>();
+
+    private bool firstAttribute = true;
 
     // ── Public Properties ───────────────────────────────────────────
     public IReadOnlyList<AttributeSO> Items => inventory;
@@ -58,6 +61,14 @@ public class AttributeInventory : MonoBehaviour
         GameEventManager.AttributePickedUp(attribute);
 
         Debug.Log($"[AttributeInventory] ✔ Picked up '{attribute.displayName}' (wasDefault: {wasDefault}). Inventory: {Count}/{maxCapacity}");
+        
+
+        if (firstAttribute && inventory.Count == 1)
+        {
+            string actualText = NarratorLinesSO.Instance.GetLine("solidRemoved");
+            GameEventManager.NarratorSpeak(actualText, 3f);
+        }
+        
         return true;
     }
 
