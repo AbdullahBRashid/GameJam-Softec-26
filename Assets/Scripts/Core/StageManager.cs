@@ -56,13 +56,29 @@ public class StageManager : MonoBehaviour
     private void Start()
     {
         // Find all attribute controllers in the scene initially
-        _allObjects = FindObjectsByType<AttributeController>(FindObjectsSortMode.None);
+        // We include inactive ones to ensure a complete world snapshot
+        _allObjects = FindObjectsByType<AttributeController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         
         // Find all stage zones to register them early
         StageZone[] zones = FindObjectsByType<StageZone>(FindObjectsSortMode.None);
         foreach (var zone in zones)
         {
             _stageZones[zone.stageIndex] = zone;
+        }
+
+        // Wait to ensure all Start() methods naturally fire first, then save the world state
+        StartCoroutine(SaveInitialCheckpointRoutine());
+    }
+
+    private System.Collections.IEnumerator SaveInitialCheckpointRoutine()
+    {
+        yield return new WaitForEndOfFrame();
+        
+        // Only save if we haven't already hit a trigger (just in case they spawned physically inside a trigger)
+        if (_objectSnapshots.Count == 0)
+        {
+            SaveCheckpoint();
+            Debug.Log("[StageManager] Initial world state snapshotted successfully.");
         }
     }
 
