@@ -249,15 +249,12 @@ public class InteractionSystem : MonoBehaviour
             }
         }
 
-        // ── APPLY section: show compatible inventory attributes ──
+        // ── APPLY section: show inventory attributes ──
         if (_currentTarget != null)
         {
             foreach (var attr in _inventory.Items)
             {
-                if (_currentTarget.CanAccept(attr))
-                {
-                    CreateApplyButton(attr);
-                }
+                CreateApplyButton(attr);
             }
         }
     }
@@ -298,28 +295,42 @@ public class InteractionSystem : MonoBehaviour
         GameObject btn = Object.Instantiate(attributeButtonPrefab, applyButtonContainer);
         btn.name = $"Apply_{attr.displayName}";
 
-        // Calculate cost info for applying this attribute
-        bool isRestoring = _currentTarget.IsDefaultAttribute(attr) && _currentTarget.IsMissingDefault(attr);
-        float reduction = isRestoring ? attr.volatilityCost : attr.volatilityCost * 0.5f;
-        string costStr = isRestoring
-            ? $"  <color=#2ECC71>-{reduction:F0}</color>"
-            : $"  <color=#F1C40F>-{reduction:F0}</color>";
-        string label = $"APPLY{costStr}";
+        bool isCompatible = _currentTarget.CanAccept(attr);
+        string label;
+        Color tintColor;
+        float reduction = 0f;
+
+        if (isCompatible)
+        {
+            // Calculate cost info for applying this attribute
+            bool isRestoring = _currentTarget.IsDefaultAttribute(attr) && _currentTarget.IsMissingDefault(attr);
+            reduction = isRestoring ? attr.volatilityCost : attr.volatilityCost * 0.5f;
+            string costStr = isRestoring
+                ? $"  <color=#2ECC71>-{reduction:F0}</color>"
+                : $"  <color=#F1C40F>-{reduction:F0}</color>";
+            label = $"APPLY{costStr}";
+            tintColor = attr.attributeColor;
+        }
+        else
+        {
+            label = "<color=#E74C3C>INCOMPATIBLE</color>";
+            tintColor = Color.gray;
+        }
 
         var buttonUI = btn.GetComponent<AttributeButtonUI>();
         if (buttonUI != null)
         {
-            buttonUI.Setup(attr, label, attr.attributeColor, () => OnApplyButtonClicked(attr));
+            buttonUI.Setup(attr, label, tintColor, () => OnApplyButtonClicked(attr, isCompatible, btn));
         }
         else
         {
             var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
             var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
-            if (uiText != null) { uiText.text = $"Apply: {attr.displayName} (-{reduction:F0})"; uiText.supportRichText = true; }
-            if (uiButton != null) uiButton.onClick.AddListener(() => OnApplyButtonClicked(attr));
+            if (uiText != null) { uiText.text = isCompatible ? $"Apply: {attr.displayName} (-{reduction:F0})" : $"Incompatible: {attr.displayName}"; uiText.supportRichText = true; }
+            if (uiButton != null) uiButton.onClick.AddListener(() => OnApplyButtonClicked(attr, isCompatible, btn));
 
             var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            if (tmpText != null) { tmpText.text = $"Apply: {attr.displayName} (-{reduction:F0})"; tmpText.richText = true; }
+            if (tmpText != null) { tmpText.text = isCompatible ? $"Apply: {attr.displayName} (-{reduction:F0})" : $"<color=#E74C3C>Incompatible: {attr.displayName}</color>"; tmpText.richText = true; }
         }
     }
 
@@ -350,13 +361,15 @@ public class InteractionSystem : MonoBehaviour
             PopulatePanel();
     }
 
-    private void OnApplyButtonClicked(AttributeSO attr)
+    private void OnApplyButtonClicked(AttributeSO attr, bool isCompatible, GameObject btn)
     {
         if (_currentTarget == null) return;
 
-        if (!_currentTarget.CanAccept(attr))
+        if (!isCompatible || !_currentTarget.CanAccept(attr))
         {
             Debug.Log($"[InteractionSystem] Cannot apply '{attr.displayName}' here.");
+            StartCoroutine(ShakeButtonCoroutine(btn));
+            GameEventManager.NarratorSpeak("I can't put that there.", 2f);
             return;
         }
 
@@ -368,6 +381,32 @@ public class InteractionSystem : MonoBehaviour
         }
 
         PopulatePanel();
+    }
+
+    private System.Collections.IEnumerator ShakeButtonCoroutine(GameObject btn)
+    {
+        if (btn == null) yield break;
+        
+        RectTransform rt = btn.GetComponent<RectTransform>();
+        if (rt == null) yield break;
+        
+        Vector3 originalPos = rt.anchoredPosition3D;
+        float elapsed = 0f;
+        float duration = 0.3f;
+        float magnitude = 10f;
+        
+        while (elapsed < duration)
+        {
+            if (btn == null || rt == null) yield break;
+            float damping = 1f - (elapsed / duration);
+            float xOffset = Mathf.Sin(elapsed * 60f) * magnitude * damping;
+            rt.anchoredPosition3D = originalPos + new Vector3(xOffset, 0, 0);
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        
+        if (btn != null && rt != null)
+            rt.anchoredPosition3D = originalPos;
     }
 
     // ═══ Helpers ════════════════════════════════════════════════════

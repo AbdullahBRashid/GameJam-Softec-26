@@ -14,6 +14,10 @@ public class AttributeController : MonoBehaviour
     [Tooltip("What type of object this is (for attribute compatibility).")]
     [SerializeField] private ObjectCategory category = ObjectCategory.PhysicsObject;
 
+    [Header("Compatibility Settings")]
+    [Tooltip("If this list is not empty, ONLY attributes in this list (and default attributes) can be applied to this object. If empty, any attribute compatible with the object's category can be applied.")]
+    [SerializeField] private List<AttributeSO> compatibleAttributes = new List<AttributeSO>();
+
     [Header("Default Attributes")]
     [Tooltip("Attributes this object spawns with. These are its 'home' attributes for volatility tracking.")]
     [SerializeField] private List<AttributeSO> defaultAttributes = new List<AttributeSO>();
@@ -25,6 +29,12 @@ public class AttributeController : MonoBehaviour
     [Header("Limits")]
     [Tooltip("Max attributes this object can hold at once.")]
     [SerializeField] private int maxAttributes = 3;
+
+    [Header("Allowed Attributes")]
+    [Tooltip("If true, only attributes in the allowed list can be applied.")]
+    [SerializeField] private bool restrictAllowedAttributes = false;
+    [Tooltip("The allowed attributes if restriction is enabled.")]
+    [SerializeField] private List<AttributeSO> allowedAttributes = new List<AttributeSO>();
 
     [Header("Lock State (AI Director)")]
     [Tooltip("If true, attributes cannot be removed from this object.")]
@@ -110,15 +120,43 @@ public class AttributeController : MonoBehaviour
 
     /// <summary>
     /// Check if this object can accept a given attribute.
-    /// Checks: compatibility, capacity, no duplicates.
+    /// Checks: whitelist, category compatibility, capacity, no duplicates.
     /// </summary>
     public bool CanAccept(AttributeSO attribute)
     {
         if (attribute == null) return false;
         if (IsFull) return false;
         if (HasAttribute(attribute)) return false;
+        if (!IsLocallyCompatible(attribute)) return false;
         if (!attribute.IsCompatibleWith(category)) return false;
+
+        if (restrictAllowedAttributes)
+        {
+            bool found = false;
+            foreach (var allowed in allowedAttributes)
+            {
+                if (allowed != null && allowed.attributeID == attribute.attributeID)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+
         return true;
+    }
+
+    private bool IsLocallyCompatible(AttributeSO attribute)
+    {
+        if (compatibleAttributes.Count == 0) return true;
+        if (IsDefaultAttribute(attribute)) return true;
+        
+        foreach (var compAttr in compatibleAttributes)
+        {
+            if (compAttr != null && compAttr.attributeID == attribute.attributeID) return true;
+        }
+        return false;
     }
 
     // ═══ Apply / Remove API ═════════════════════════════════════════
@@ -131,6 +169,13 @@ public class AttributeController : MonoBehaviour
     public bool ApplyAttribute(AttributeSO attribute)
     {
         if (attribute == null) return false;
+
+        // Check local compatibility whitelist
+        if (!IsLocallyCompatible(attribute))
+        {
+            Debug.LogWarning($"[AttributeController] '{attribute.displayName}' is not in the whitelist for '{gameObject.name}'.");
+            return false;
+        }
 
         // Check compatibility
         if (!attribute.IsCompatibleWith(category))
