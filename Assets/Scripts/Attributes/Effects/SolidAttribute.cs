@@ -12,28 +12,21 @@ using System.Collections.Generic;
 /// </summary>
 public class SolidAttribute : IAttributeEffect
 {
-    private List<Collider> _modifiedColliders = new List<Collider>();
-    private bool _suspendedPhysics = false;
-
     public void Apply(GameObject target, AttributeSO attribute)
     {
         AttributeController controller = target.GetComponent<AttributeController>();
         if (controller != null && controller.IsDefaultAttribute(attribute))
         {
-            // Restore normal physical solidity
-            foreach (Collider col in _modifiedColliders)
+            // Restore normal physical solidity across all colliders
+            Collider[] colliders = target.GetComponentsInChildren<Collider>();
+            foreach (Collider col in colliders)
             {
                 if (col != null) col.isTrigger = false;
             }
-            _modifiedColliders.Clear();
 
-            // Unfreeze physics if we paused it to prevent falling through the world
-            if (_suspendedPhysics)
-            {
-                Rigidbody rb = target.GetComponent<Rigidbody>();
-                if (rb != null) rb.isKinematic = false;
-                _suspendedPhysics = false;
-            }
+            // Unfreeze physics
+            Rigidbody rb = target.GetComponent<Rigidbody>();
+            if (rb != null) rb.isKinematic = false;
             
             Debug.Log($"[SolidAttribute] RESTORED solidity on {target.name}.");
         }
@@ -49,11 +42,7 @@ public class SolidAttribute : IAttributeEffect
             Collider[] colliders = target.GetComponentsInChildren<Collider>();
             foreach (Collider col in colliders)
             {
-                if (!col.isTrigger)
-                {
-                    col.isTrigger = true;
-                    _modifiedColliders.Add(col);
-                }
+                if (col != null && !col.isTrigger) col.isTrigger = true;
             }
 
             // Freeze the rigidbody if present, because turning colliders to triggers 
@@ -62,7 +51,6 @@ public class SolidAttribute : IAttributeEffect
             if (rb != null && !rb.isKinematic)
             {
                 rb.isKinematic = true;
-                _suspendedPhysics = true;
             }
             
             Debug.Log($"[SolidAttribute] REMOVED solidity from {target.name}. Object is now ethereal.");

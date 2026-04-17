@@ -334,14 +334,14 @@ public class InteractionSystem : MonoBehaviour
         var buttonUI = btn.GetComponent<AttributeButtonUI>();
         if (buttonUI != null)
         {
-            buttonUI.Setup(attr, label, attr.attributeColor, () => OnTakeButtonClicked(attr));
+            buttonUI.Setup(attr, label, attr.attributeColor, () => OnTakeButtonClicked(attr, btn));
         }
         else
         {
             var uiButton = btn.GetComponent<UnityEngine.UI.Button>();
             var uiText = btn.GetComponentInChildren<UnityEngine.UI.Text>();
             if (uiText != null) { uiText.text = $"Take: {attr.displayName} ({(isDefault ? "+" + attr.volatilityCost : "+0")})"; uiText.supportRichText = true; }
-            if (uiButton != null) uiButton.onClick.AddListener(() => OnTakeButtonClicked(attr));
+            if (uiButton != null) uiButton.onClick.AddListener(() => OnTakeButtonClicked(attr, btn));
 
             var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
             if (tmpText != null) { tmpText.text = $"Take: {attr.displayName} ({(isDefault ? "+" + attr.volatilityCost : "+0")})"; tmpText.richText = true; }
@@ -408,9 +408,22 @@ public class InteractionSystem : MonoBehaviour
 
     // ═══ Button Click Handlers ══════════════════════════════════════
 
-    private void OnTakeButtonClicked(AttributeSO attr)
+    private void OnTakeButtonClicked(AttributeSO attr, GameObject btn)
     {
         if (_currentTarget == null) return;
+
+        // Check if taking this would exceed max volatility
+        if (VolatilityManager.Instance != null && attr.attributeID.ToLower() != "key")
+        {
+            float costToAdd = _currentTarget.IsDefaultAttribute(attr) ? attr.volatilityCost : (attr.volatilityCost * 0.5f);
+            if (VolatilityManager.Instance.Volatility + costToAdd > VolatilityManager.Instance.MaxVolatility)
+            {
+                Debug.Log($"[InteractionSystem] Blocked. Taking '{attr.displayName}' would exceed max volatility limit.");
+                StartCoroutine(ShakeButtonCoroutine(btn));
+                GameEventManager.NarratorSpeak("SYSTEM LIMIT REACHED: Interaction would critically destabilize runtime.", 3f);
+                return;
+            }
+        }
 
         // --- NEW: Special Key Teleport Sequence ---
         if (attr.attributeID.ToLower() == "key")
