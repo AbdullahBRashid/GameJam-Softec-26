@@ -56,6 +56,12 @@ public class DoorController : MonoBehaviour
     {
         if (!enabled || _isOpen || !CanInteract) return;
 
+        if (!GameEventManager.IsTimeRunning)
+        {
+            GameEventManager.NarratorSpeak("It won't budge. Time is standing still.", 2f);
+            return;
+        }
+
         if (doorAnimator == null)
         {
             Debug.LogWarning($"[DoorController] {gameObject.name} — no Animator found on child pivot!");
@@ -80,6 +86,12 @@ public class DoorController : MonoBehaviour
     public void CloseDoor()
     {
         if (!_isOpen || !CanInteract) return;
+
+        if (!GameEventManager.IsTimeRunning)
+        {
+            GameEventManager.NarratorSpeak("It won't budge. Time is standing still.", 2f);
+            return;
+        }
 
         if (doorAnimator == null) return;
 

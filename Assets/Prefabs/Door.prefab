@@ -141,10 +141,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeController
   category: 2
+  compatibleAttributes:
+  - {fileID: 11400000, guid: 3690ae7f06718944185bdf159bb034ae, type: 2}
+  - {fileID: 11400000, guid: b9eb3258681cdaa43942b636a0adece5, type: 2}
   defaultAttributes:
   - {fileID: 11400000, guid: 3690ae7f06718944185bdf159bb034ae, type: 2}
   activeAttributes: []
   maxAttributes: 3
+  restrictAllowedAttributes: 0
+  allowedAttributes: []
   isLocked: 0
 --- !u!114 &699590543848032905
 MonoBehaviour:

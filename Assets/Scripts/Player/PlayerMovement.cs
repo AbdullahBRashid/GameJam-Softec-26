@@ -17,6 +17,13 @@ public class PlayerMovement : MonoBehaviour
     public float gravity = -25f; 
     public float jumpHeight = 1.5f;
 
+    [Header("Feel Good Mechanics")]
+    public float coyoteTime = 0.1f;
+    private float _coyoteTimeCounter;
+    
+    public float jumpBufferTime = 0.1f;
+    private float _jumpBufferCounter;
+
     // ── Volatility Bug State ──
     private bool _controlsInverted = false;
     private bool _gravityReversed = false;
@@ -68,22 +75,37 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnJump()
     {
-        if (isGrounded)
-        {
-            // Jump formula: v = sqrt(h * -2 * g)
-            // When gravity is reversed, jump downward
-            float jumpDir = _gravityReversed ? -1f : 1f;
-            velocity.y = jumpDir * Mathf.Sqrt(jumpHeight * 2f * Mathf.Abs(gravity));
-        }
+        _jumpBufferCounter = jumpBufferTime;
     }
 
     void Update()
     {
         isGrounded = controller.isGrounded;
 
-        if (isGrounded && (_gravityReversed ? velocity.y > 0 : velocity.y < 0))
+        if (isGrounded)
         {
-            velocity.y = _gravityReversed ? 2f : -2f;
+            _coyoteTimeCounter = coyoteTime;
+
+            if (_gravityReversed ? velocity.y > 0 : velocity.y < 0)
+            {
+                velocity.y = _gravityReversed ? 2f : -2f;
+            }
+        }
+        else
+        {
+            _coyoteTimeCounter -= Time.deltaTime;
+        }
+
+        // ── Jump Buffer & Coyote Time Resolution ──
+        _jumpBufferCounter -= Time.deltaTime;
+        
+        if (_jumpBufferCounter > 0f && _coyoteTimeCounter > 0f)
+        {
+            float jumpDir = _gravityReversed ? -1f : 1f;
+            velocity.y = jumpDir * Mathf.Sqrt(jumpHeight * 2f * Mathf.Abs(gravity));
+            
+            _jumpBufferCounter = 0f;
+            _coyoteTimeCounter = 0f; // Consume to prevent double jumping
         }
 
         // Calculate Movement (apply inversion if active)
@@ -141,6 +163,18 @@ public class PlayerMovement : MonoBehaviour
         if (healObj != null)
         {
             healObj.HealPlayer(gameObject);
+        }
+
+        // Fan Hazard check
+        FanHazard fan = hit.gameObject.GetComponent<FanHazard>();
+        if (fan != null)
+        {
+            PlayerHealth health = GetComponent<PlayerHealth>();
+            if (health != null)
+            {
+                // We let the FanHazard handle the condition check and apply damage
+                fan.HitByPlayer(health); 
+            }
         }
     }
 }

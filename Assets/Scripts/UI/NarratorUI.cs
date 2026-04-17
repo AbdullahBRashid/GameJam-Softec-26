@@ -24,6 +24,10 @@ public class NarratorUI : MonoBehaviour
     [SerializeField] private float hintDelay = 2f;
     [SerializeField] private float hintDuration = 5f;
 
+    [Header("UI Scaling")]
+    [Tooltip("Base font size for the narrator text. The rest of the panel scales automatically based on this.")]
+    [SerializeField] private int baseFontSize = 24;
+
     // ── UI References ──
     private Canvas _canvas;
     private CanvasGroup _canvasGroup;
@@ -84,7 +88,7 @@ public class NarratorUI : MonoBehaviour
         _prefixText.gameObject.SetActive(false);
         _narratorText.color = _hintColor;
         _narratorText.fontStyle = FontStyle.Italic;
-        _narratorText.fontSize = 16;
+        _narratorText.fontSize = Mathf.RoundToInt(16 * (baseFontSize / 18f));
 
         _activeCoroutine = StartCoroutine(TypewriterSequence(
             "Look at objects and press  E  to interact with them.", hintDuration, true));
@@ -103,7 +107,7 @@ public class NarratorUI : MonoBehaviour
             _prefixText.text = "AI >";
             _narratorText.color = _textColor;
             _narratorText.fontStyle = FontStyle.Normal;
-            _narratorText.fontSize = 18;
+            _narratorText.fontSize = baseFontSize;
         }
 
         // Fade in
@@ -145,6 +149,8 @@ public class NarratorUI : MonoBehaviour
 
     private void BuildUI()
     {
+        float scale = baseFontSize / 18f;
+
         // ── Canvas ──
         GameObject canvasObj = new GameObject("NarratorUI_Canvas");
         canvasObj.transform.SetParent(transform);
@@ -163,8 +169,8 @@ public class NarratorUI : MonoBehaviour
         _panel.anchorMin = new Vector2(0.15f, 0);
         _panel.anchorMax = new Vector2(0.85f, 0);
         _panel.pivot = new Vector2(0.5f, 0);
-        _panel.anchoredPosition = new Vector2(0, 40);
-        _panel.sizeDelta = new Vector2(0, 80);
+        _panel.anchoredPosition = new Vector2(0, 40 * scale);
+        _panel.sizeDelta = new Vector2(0, 80 * scale);
 
         _panelBg = panelObj.AddComponent<Image>();
         _panelBg.color = _bgColor;
@@ -180,7 +186,7 @@ public class NarratorUI : MonoBehaviour
         _prefixText = prefixObj.AddComponent<Text>();
         _prefixText.text = "AI >";
         _prefixText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _prefixText.fontSize = 14;
+        _prefixText.fontSize = Mathf.RoundToInt(14 * scale);
         _prefixText.fontStyle = FontStyle.Bold;
         _prefixText.color = _prefixColor;
         _prefixText.alignment = TextAnchor.MiddleLeft;
@@ -189,8 +195,8 @@ public class NarratorUI : MonoBehaviour
         prefRT.anchorMin = new Vector2(0, 0);
         prefRT.anchorMax = new Vector2(0, 1);
         prefRT.pivot = new Vector2(0, 0.5f);
-        prefRT.anchoredPosition = new Vector2(20, 0);
-        prefRT.sizeDelta = new Vector2(50, 0);
+        prefRT.anchoredPosition = new Vector2(20 * scale, 0);
+        prefRT.sizeDelta = new Vector2(50 * scale, 0);
 
         // ── Message Text ──
         GameObject textObj = new GameObject("Message");
@@ -198,7 +204,7 @@ public class NarratorUI : MonoBehaviour
         _narratorText = textObj.AddComponent<Text>();
         _narratorText.text = "";
         _narratorText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _narratorText.fontSize = 18;
+        _narratorText.fontSize = baseFontSize;
         _narratorText.color = _textColor;
         _narratorText.alignment = TextAnchor.MiddleLeft;
         _narratorText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -208,8 +214,8 @@ public class NarratorUI : MonoBehaviour
         textRT.anchorMin = new Vector2(0, 0);
         textRT.anchorMax = new Vector2(1, 1);
         textRT.pivot = new Vector2(0, 0.5f);
-        textRT.anchoredPosition = new Vector2(75, 0);
-        textRT.sizeDelta = new Vector2(-100, -20);
+        textRT.anchoredPosition = new Vector2(75 * scale, 0);
+        textRT.sizeDelta = new Vector2(-100 * scale, -20 * scale);
 
         // ── Accent line (top edge of panel) ──
         GameObject lineObj = new GameObject("AccentLine");
@@ -219,7 +225,7 @@ public class NarratorUI : MonoBehaviour
         lineRT.anchorMax = new Vector2(1, 1);
         lineRT.pivot = new Vector2(0.5f, 1);
         lineRT.anchoredPosition = Vector2.zero;
-        lineRT.sizeDelta = new Vector2(0, 2);
+        lineRT.sizeDelta = new Vector2(0, Mathf.Max(2f, 2f * scale));
         Image lineImg = lineObj.AddComponent<Image>();
         lineImg.color = new Color(0.3f, 0.6f, 1f, 0.4f);
         lineImg.raycastTarget = false;

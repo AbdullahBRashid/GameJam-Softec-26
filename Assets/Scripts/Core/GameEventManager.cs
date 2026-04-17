@@ -70,6 +70,10 @@ public static class GameEventManager
     /// <summary>Fired when the player dies.</summary>
     public static event Action OnPlayerDied;
 
+    // ─── Time Events ────────────────────────────────────────────────
+    public static event Action<bool> OnTimeStateChanged;
+    public static bool IsTimeRunning { get; private set; } = true;
+
     // ─── Stage Events ───────────────────────────────────────────────
     /// <summary>Fired when the player enters a stage zone. Args: (int stageIndex)</summary>
     public static event Action<int> OnStageEntered;
@@ -170,6 +174,12 @@ public static class GameEventManager
     public static void PlayerDied()
     {
         OnPlayerDied?.Invoke();
+    }
+
+    public static void SetTimeState(bool isRunning)
+    {
+        IsTimeRunning = isRunning;
+        OnTimeStateChanged?.Invoke(isRunning);
     }
 
     public static void StageEntered(int stageIndex)

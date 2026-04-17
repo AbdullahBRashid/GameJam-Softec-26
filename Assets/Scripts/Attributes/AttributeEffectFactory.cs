@@ -23,6 +23,8 @@ public static class AttributeEffectFactory
             "frictionless"  => new FrictionlessAttribute(),
             "heavy"         => new HeavyAttribute(),
             "locked"        => new LockedAttribute(),
+            "temporal"      => new TemporalAttribute(),
+            "solid"         => new SolidAttribute(),
             // Add more here as you create new effects:
             // "magnetic"   => new MagneticAttribute(),
             // "explosive"  => new ExplosiveAttribute(),

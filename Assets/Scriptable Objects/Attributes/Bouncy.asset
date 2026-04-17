@@ -15,7 +15,9 @@ MonoBehaviour:
   attributeID: bouncy
   displayName: Bouncy
   description: Makes surfaces springy. Objects bounce off with high energy.
-  attributeColor: {r: 0.13919187, g: 1, b: 0, a: 1}
+  compatibleWith: 00000000
+  isPhysicsAttribute: 1
+  attributeColor: {r: 0.28586686, g: 0.8301887, b: 0.48582095, a: 1}
   icon: {fileID: 0}
   vfxPrefab: {fileID: 0}
   applySound: {fileID: 0}
