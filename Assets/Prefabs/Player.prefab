@@ -23,7 +23,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2117260856851376137
 Transform:
   m_ObjectHideFlags: 0
@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 236095cc49f85634e9607cd2e080e5c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  speed: 5
+  speed: 10
   gravity: -19.62
   jumpHeight: 2
   coyoteTime: 0.1
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f07d22158cf4243bbe3d4b20e06dfa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeInventory
-  maxCapacity: 3
+  maxCapacity: 300
   inventory: []
 --- !u!114 &684840139042110257
 MonoBehaviour:
@@ -198,7 +198,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: GenericRemoveLockedAttribute
 --- !u!1 &7175596948067445962
 GameObject:
   m_ObjectHideFlags: 0

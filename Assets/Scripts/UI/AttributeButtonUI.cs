@@ -32,16 +32,10 @@ public class AttributeButtonUI : MonoBehaviour
     {
         if (_button == null) _button = GetComponent<Button>();
 
-        // Set icon
-        if (iconImage != null && attribute.icon != null)
+        // Hide icon per aesthetic request
+        if (iconImage != null)
         {
-            iconImage.sprite = attribute.icon;
-            iconImage.color = Color.white;
-        }
-        else if (iconImage != null)
-        {
-            // No icon — tint the icon slot with the attribute color
-            iconImage.color = tint;
+            iconImage.gameObject.SetActive(false);
         }
 
         // Set label text
@@ -56,12 +50,10 @@ public class AttributeButtonUI : MonoBehaviour
             actionText.text = actionLabel;
         }
 
-        // Tint the background
+        // Tint the background to a static, sleek dark color instead of the attribute color
         if (backgroundImage != null)
         {
-            Color bg = tint;
-            bg.a = 0.3f;
-            backgroundImage.color = bg;
+            backgroundImage.color = new Color(0.12f, 0.12f, 0.14f, 0.95f);
         }
 
         // Set up click handler

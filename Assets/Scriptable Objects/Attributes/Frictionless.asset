@@ -15,11 +15,13 @@ MonoBehaviour:
   attributeID: frictionless
   displayName: Frictionless
   description: Removes all surface friction. Everything slides.
+  compatibleWith: 00000000
+  isPhysicsAttribute: 1
   attributeColor: {r: 0, g: 0.9056604, b: 0.8562951, a: 1}
   icon: {fileID: 0}
   vfxPrefab: {fileID: 0}
   applySound: {fileID: 0}
   removeSound: {fileID: 0}
   physicsMaterial: {fileID: 13400000, guid: c476ca30e71928d4e8da6906367be72b, type: 2}
-  volatilityCost: 5
+  volatilityCost: 25
   canBeLocked: 1
