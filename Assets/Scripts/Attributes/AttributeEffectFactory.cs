@@ -26,6 +26,8 @@ public static class AttributeEffectFactory
             "temporal"      => new TemporalAttribute(),
             "solid"         => new SolidAttribute(),
             "key"           => new KeyAttribute(),
+            "glow"          => new GlowAttribute(),
+            "shattered"     => new ShatteredAttribute(),
             // Add more here as you create new effects:
             // "magnetic"   => new MagneticAttribute(),
             // "explosive"  => new ExplosiveAttribute(),

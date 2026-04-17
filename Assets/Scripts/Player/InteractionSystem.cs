@@ -125,15 +125,68 @@ public class InteractionSystem : MonoBehaviour
 
         Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, interactRange, interactableLayer))
-        {
-            AttributeController controller = hit.collider.GetComponent<AttributeController>();
+        // We explicitly cast through everything (except IgnoreRaycast) to guarantee we can see Mirrors, 
+        // which might just be on the 'Default' layer rather than the dedicated 'interactable' layer!
+        RaycastHit[] hits = Physics.RaycastAll(ray, interactRange);
+        
+        // Sort hits by distance so we process the closest physical object first
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-            if (controller != null)
+        foreach (var hit in hits)
+        {
+            // Ignore the ray colliding with the inside of the player's own head when looking forward!
+            if (hit.collider.transform.root == transform.root) continue;
+
+            AttributeController controller = null;
+
+            // 1. Did we hit a Mirror?
+            if (hit.collider.CompareTag("Mirror"))
             {
-                _currentTarget = controller;
-                if (interactPromptUI != null) interactPromptUI.SetActive(true);
-                return;
+                // BOUNCE THE RAY!
+                Vector3 reflectDir = Vector3.Reflect(ray.direction, hit.normal);
+                float remainingDist = interactRange - hit.distance;
+                
+                // Nudge the start point slightly forward along the normal to prevent immediately hitting the mirror again
+                Ray reflectRay = new Ray(hit.point + hit.normal * 0.01f, reflectDir);
+                
+                // Now, specifically query the reflect ray. 
+                // We test against EVERYTHING again because we need to see the Player's body!
+                RaycastHit[] reflectedHits = Physics.RaycastAll(reflectRay, remainingDist);
+                System.Array.Sort(reflectedHits, (a, b) => a.distance.CompareTo(b.distance));
+                
+                foreach (var refHit in reflectedHits)
+                {
+                    if (refHit.collider.CompareTag("Mirror")) continue; // Don't infinite loop mirrors
+                    
+                    controller = refHit.collider.GetComponentInParent<AttributeController>();
+                    if (controller != null) break;
+                }
+                
+                // A mirror is solid glass; we cannot physically interact 'through' it directly 
+                // without reflection, so we stop evaluating forward hits.
+                if (controller != null)
+                {
+                    _currentTarget = controller;
+                    if (interactPromptUI != null) interactPromptUI.SetActive(true);
+                    return;
+                }
+                break;
+            }
+            // 2. Did we directly look at an interactable object?
+            else if (((1 << hit.collider.gameObject.layer) & interactableLayer.value) != 0)
+            {
+                controller = hit.collider.GetComponentInParent<AttributeController>();
+                if (controller != null)
+                {
+                    _currentTarget = controller;
+                    if (interactPromptUI != null) interactPromptUI.SetActive(true);
+                    return;
+                }
+            }
+            // 3. Did we hit a solid, standard wall that blocks our vision?
+            else if (!hit.collider.isTrigger)
+            {
+                break;
             }
         }
 
@@ -418,8 +471,16 @@ public class InteractionSystem : MonoBehaviour
 
     private System.Collections.IEnumerator KeyTeleportSequence(AttributeSO keyAttr, AttributeController target)
     {
-        // 1. Delete the key from the scene permanently
-        target.RemoveAttribute(keyAttr);
+        // 1. Delete the key from the scene permanently and place it in the player's inventory
+        bool wasDefault = target.IsDefaultAttribute(keyAttr);
+        GameObject sourceObj = target.gameObject;
+        
+        AttributeSO taken = target.RemoveAttribute(keyAttr);
+        if (taken != null)
+        {
+            _inventory.AddAttribute(taken, sourceObj, wasDefault);
+        }
+
         ClosePanel(); // Note: ClosePanel re-enables input, so we immediately disable it again below.
 
         // --- DISABLE INPUT FOR CUTSCENE ---
