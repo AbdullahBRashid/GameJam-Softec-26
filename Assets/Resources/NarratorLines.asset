@@ -78,3 +78,40 @@ MonoBehaviour:
     message: Oh you just stopped time. That works I guess.
   - messageName: Level3DoorWontBudge
     message: "You stopped time, idiot! Can\u2019t open the door so easily."
+  - messageName: Level4Intro
+    message: "It\u2019s okay you can stop now, there\u2019s nothing past this door
+      you don't have to try so hard."
+  - messageName: Level4Glow
+    message: "Stop already come on, trust me there\u2019s nothing cool past this
+      door."
+  - messageName: Level4Success
+    message: "Oooookaaay you\u2019ve proven to all of us that you're a big macho
+      man let\u2019s stop now, don\u2019t go into this door"
+  - messageName: Level4Warning1
+    message: "I\u2019m warning you, do not open this door."
+  - messageName: Level4Warning2
+    message: Don't.
+  - messageName: Level5-1
+    message: "Well there you go, an impossible level, there\u2019s no way you can
+      make it past this level. Give up now."
+  - messageName: Level5-2
+    message: "STOP TRYING TO ATTEMPT THIS LEVEL, YOU\u2019RE MAKING BOTH OF US LOOK
+      BAD"
+  - messageName: Level5-3
+    message: "THERE\u2019S ACTUALLY NOTHING BEHIND THAT NEXT DOOR"
+  - messageName: Level5-4
+    message: STOP JUMPING SO MUCH
+  - messageName: Level5-5
+    message: STOP ALREADY
+  - messageName: Level5-6
+    message: "DO NOT GO PAST THAT DOOR, I\u2019M WARNING YOU"
+  - messageName: EndingRoomIntro
+    message: "Well, congratulations I guess, nobody has ever made it into this room.
+      Other than me ofcourse. Let\u2019s wrap this up so we can all go home and relax"
+  - messageName: EndingRoomBlue1
+    message: "Just walk through the blue door, definitely our creator\u2019s favorite
+      color"
+  - messageName: EndingRoomBlue2
+    message: Walk on through the blue door and you can get your happy ending
+  - messageName: EndingRoomRed
+    message: "Ignore the red door though, there\u2019s nothing good behind that door"

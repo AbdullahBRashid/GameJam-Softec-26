@@ -28,6 +28,7 @@ public class AttributeInventory : MonoBehaviour
 
     private bool firstAttribute = true;
     private bool firstTimeStop = true;
+    private bool firstGlow = true;
 
     // ── Public Properties ───────────────────────────────────────────
     public IReadOnlyList<AttributeSO> Items => inventory;
@@ -77,6 +78,14 @@ public class AttributeInventory : MonoBehaviour
         {
             GameEventManager.NarratorSpeak("Level3TimeStopped", 3f);
             firstTimeStop = false;
+        }
+
+        bool hasGlow = inventory.Any(a => a.attributeID == "glow");
+
+        if (firstGlow && hasGlow)
+        {
+            GameEventManager.NarratorSpeak("Level4Glow", 3f);
+            firstGlow = false;
         }
         
         return true;
