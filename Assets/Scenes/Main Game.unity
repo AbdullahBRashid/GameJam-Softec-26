@@ -4089,7 +4089,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageZone
   stageIndex: 0
-  stageName: Tutorial Stage
+  stageName: Entry Stage
   spawnPoint: {fileID: 592148348}
 --- !u!1 &275062280
 GameObject:
@@ -12454,8 +12454,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 16.8, y: -5.52, z: -48.84}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.07, y: 1.07, z: 1.07}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 697986184}
   - {fileID: 338475529}
@@ -13545,8 +13545,9 @@ GameObject:
   - component: {fileID: 697986184}
   - component: {fileID: 697986186}
   - component: {fileID: 697986185}
-  - component: {fileID: 697986187}
   - component: {fileID: 697986188}
+  - component: {fileID: 697986189}
+  - component: {fileID: 697986190}
   m_Layer: 0
   m_Name: propeller
   m_TagString: Untagged
@@ -13629,7 +13630,43 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 697986183}
   m_Mesh: {fileID: -5925590898335423310, guid: 293455c84aae21e4da3c86925dd7c3d0, type: 3}
---- !u!64 &697986187
+--- !u!114 &697986188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697986183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59ee31e9f6074164e820346c26e40ca8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FanHazard
+  spinSpeed: 2160
+  spinAxis: {x: 0, y: 0, z: 1}
+  damagePerTick: 5
+--- !u!65 &697986189
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 697986183}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.17693873, y: 0.12189987, z: 0.019694505}
+  m_Center: {x: -0.0052671083, y: -0.0034140865, z: -0.004137217}
+--- !u!64 &697986190
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -13651,21 +13688,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -5925590898335423310, guid: 293455c84aae21e4da3c86925dd7c3d0, type: 3}
---- !u!114 &697986188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 697986183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59ee31e9f6074164e820346c26e40ca8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FanHazard
-  spinSpeed: 1440
-  spinAxis: {x: 0, y: 0, z: 1}
-  damagePerTick: 5
 --- !u!1 &700748124
 GameObject:
   m_ObjectHideFlags: 0
@@ -17297,7 +17319,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -678, y: 404}
+  m_AnchoredPosition: {x: -621, y: -146}
   m_SizeDelta: {x: 492.6082, y: 157.4888}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &870423509
@@ -22550,8 +22572,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b2e9e589ae9b3c4b95fb5cee3ffc8a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageZone
-  stageIndex: 1
-  stageName: Trampoline Stage
+  stageIndex: 2
+  stageName: Fan Stage
   spawnPoint: {fileID: 2027063}
 --- !u!65 &1129088165
 BoxCollider:
@@ -41818,7 +41840,7 @@ PrefabInstance:
       objectReference: {fileID: 937505734}
     - target: {fileID: 6120085286804488741, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}
       propertyPath: defaultAttributes.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6120085286804488741, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}
       propertyPath: 'defaultAttributes.Array.data[0]'

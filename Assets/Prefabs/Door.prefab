@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 9185462922908140346}
   - component: {fileID: 699590543848032905}
   - component: {fileID: 3137495108233737909}
+  - component: {fileID: 6252418750606825041}
   m_Layer: 6
   m_Name: Door
   m_TagString: AttributeReady
@@ -151,6 +152,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
+  lockedMessageName: GenericRemoveLockedAttribute
 --- !u!114 &699590543848032905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -189,6 +191,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.2664528, y: 2.4470189, z: 0.27274704}
   m_Center: {x: 1.1753788, y: 0.56606185, z: -0.54356956}
+--- !u!114 &6252418750606825041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617580691958238880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41206b3bdf510c64d8dc4db894ad5cee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DoorTooltip
+  activationDistance: 5
+  localOffset: {x: 0.493, y: 0.725, z: -0.303}
+  fadeSpeed: 5
+  tooltipSprite: {fileID: 21300000, guid: 75de9942ea34f1943b72bb2664d12b80, type: 3}
+  tooltipSize: {x: 0.2, y: 0.25}
 --- !u!1 &3817736370780571174
 GameObject:
   m_ObjectHideFlags: 0
