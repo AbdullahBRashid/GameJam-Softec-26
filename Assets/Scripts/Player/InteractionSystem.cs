@@ -448,7 +448,7 @@ public class InteractionSystem : MonoBehaviour
         {
             Debug.Log($"[InteractionSystem] Cannot apply '{attr.displayName}' here.");
             StartCoroutine(ShakeButtonCoroutine(btn));
-            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("cannotApply"), 2f);
+            GameEventManager.NarratorSpeak("cannotApply", 2f);
             return;
         }
 

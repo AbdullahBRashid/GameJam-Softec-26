@@ -98,15 +98,13 @@ public class AIDirector : MonoBehaviour
         Debug.Log($"[AIDirector] 🎭 Sabotage triggered at Level {entry.triggerLevel}: {entry.sabotageType} — \"{entry.messageName}\"");
 
         // Narrator speaks
-        string actualText = "";
         if (!string.IsNullOrEmpty(entry.messageName))
         {
-            actualText = NarratorLinesSO.Instance.GetLine(entry.messageName);
-            GameEventManager.NarratorSpeak(actualText, entry.narratorDuration);
+            GameEventManager.NarratorSpeak(entry.messageName, entry.narratorDuration);
         }
 
-        // Fire global sabotage event
-        GameEventManager.SabotageTriggered(entry.sabotageType, actualText);
+        // Fire global sabotage event (we pass the messageName, the event consumers will need to handle it or we can just pass the key)
+        GameEventManager.SabotageTriggered(entry.sabotageType, entry.messageName);
 
         // Execute the specific sabotage
         switch (entry.sabotageType)
