@@ -26,6 +26,12 @@ public class AttributeController : MonoBehaviour
     [Tooltip("Max attributes this object can hold at once.")]
     [SerializeField] private int maxAttributes = 3;
 
+    [Header("Allowed Attributes")]
+    [Tooltip("If true, only attributes in the allowed list can be applied.")]
+    [SerializeField] private bool restrictAllowedAttributes = false;
+    [Tooltip("The allowed attributes if restriction is enabled.")]
+    [SerializeField] private List<AttributeSO> allowedAttributes = new List<AttributeSO>();
+
     [Header("Lock State (AI Director)")]
     [Tooltip("If true, attributes cannot be removed from this object.")]
     [SerializeField] private bool isLocked = false;
@@ -118,6 +124,21 @@ public class AttributeController : MonoBehaviour
         if (IsFull) return false;
         if (HasAttribute(attribute)) return false;
         if (!attribute.IsCompatibleWith(category)) return false;
+
+        if (restrictAllowedAttributes)
+        {
+            bool found = false;
+            foreach (var allowed in allowedAttributes)
+            {
+                if (allowed != null && allowed.attributeID == attribute.attributeID)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+
         return true;
     }
 
