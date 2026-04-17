@@ -24,7 +24,9 @@ MonoBehaviour:
   - messageName: shatteredCritical
     message: Structural integrity critical.
   - messageName: IntroMessage
-    message: Welcome to the facility. Anomaly detected.
+    message: "Gooooood Morning, sleepy head. Wake up, i\u2019ve got work for you.
+      You don\u2019t need to know where you are, I just need you to walk through
+      a couple doors for me. "
   - messageName: ExitMessage
     message: Evacuation required immediately.
   - messageName: RemoveLockFromLockedDoor
@@ -54,8 +56,8 @@ MonoBehaviour:
   - messageName: TryOther
     message: Try the other one.
   - messageName: IntroSolidRemoved
-    message: Perfect, you just took away the solid attribute of it, now you can walk
-      through it. Good job!
+    message: Perfect, you just took away the solid attribute of it, now you can just
+      walk through it. Good job!
   - messageName: Level2Intro
     message: "There\u2019s a lava pit in your way, and the door is past it. Your
       job is to get to that door. A bunch of your predecessors failed here, let\u2019s
@@ -65,3 +67,14 @@ MonoBehaviour:
   - messageName: Level2Success
     message: Alright! You made it! You took a big hit, try going on over to the green
       button on the ground and get up to max health.
+  - messageName: Level3Intro
+    message: 'Oh, a huge red fan! Red always was his favourite color. I didn''t really
+      expect you to cross the last one, so let''s see if you can get through this
+      one. Remember, giving up is always an option. '
+  - messageName: Level3Platform
+    message: "Stuck on this platform, are we? Maybe you\u2019ll need something to
+      help you bounce higher."
+  - messageName: Level3TimeStopped
+    message: Oh you just stopped time. That works I guess.
+  - messageName: Level3DoorWontBudge
+    message: "You stopped time, idiot! Can\u2019t open the door so easily."

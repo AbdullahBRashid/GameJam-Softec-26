@@ -31414,7 +31414,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   fadeDuration: 1.5
-  maxMusicVolume: 0.5
+  maxMusicVolume: 0.1
 --- !u!1 &1563182099 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 596158413587155261, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}

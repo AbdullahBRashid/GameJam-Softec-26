@@ -75,7 +75,7 @@ public class AttributeInventory : MonoBehaviour
 
         if (firstTimeStop && hasTemporal)
         {
-            GameEventManager.NarratorSpeak("Level3TimeStoppped", 3f);
+            GameEventManager.NarratorSpeak("Level3TimeStopped", 3f);
             firstTimeStop = false;
         }
         
