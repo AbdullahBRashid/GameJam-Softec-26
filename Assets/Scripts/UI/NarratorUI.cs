@@ -30,15 +30,8 @@ public class NarratorUI : MonoBehaviour
 
     // ── UI References ──
     private Canvas _canvas;
-    private CanvasGroup _canvasGroup;
-    private RectTransform _panel;
-    private Text _narratorText;
-    private Text _prefixText;
-    private Image _panelBg;
-
-    // ── State ──
-    private Coroutine _activeCoroutine;
-    private bool _isShowing = false;
+    private GameObject _messagePrefab;
+    private Transform _messageContainer;
 
     // ── Colors ──
     private readonly Color _bgColor = new Color(0.04f, 0.04f, 0.08f, 0.88f);
@@ -49,7 +42,6 @@ public class NarratorUI : MonoBehaviour
     private void Start()
     {
         BuildUI();
-        _canvasGroup.alpha = 0f;
 
         if (showStartHint)
         {
@@ -71,10 +63,7 @@ public class NarratorUI : MonoBehaviour
 
     private void OnNarratorSpeak(string message, float duration)
     {
-        if (_activeCoroutine != null)
-            StopCoroutine(_activeCoroutine);
-
-        _activeCoroutine = StartCoroutine(TypewriterSequence(message, duration, false));
+        SpawnAndType(message, duration, false);
     }
 
     // ═══ Start Hint ═════════════════════════════════════════════════
@@ -82,50 +71,54 @@ public class NarratorUI : MonoBehaviour
     private IEnumerator ShowStartHint()
     {
         yield return new WaitForSeconds(hintDelay);
-
-        // Show "Press E to Interact" as a subtle hint
-        _prefixText.text = "";
-        _prefixText.gameObject.SetActive(false);
-        _narratorText.color = _hintColor;
-        _narratorText.fontStyle = FontStyle.Italic;
-        _narratorText.fontSize = Mathf.RoundToInt(16 * (baseFontSize / 18f));
-
-        _activeCoroutine = StartCoroutine(TypewriterSequence(
-            "Look at objects and press  E  to interact with them.", hintDuration, true));
+        SpawnAndType("Look at objects and press  E  to interact with them.", hintDuration, true);
     }
 
     // ═══ Typewriter ═════════════════════════════════════════════════
 
-    private IEnumerator TypewriterSequence(string message, float duration, bool isHint)
+    private void SpawnAndType(string message, float duration, bool isHint)
     {
-        _isShowing = true;
+        GameObject clone = Instantiate(_messagePrefab, _messageContainer);
+        clone.SetActive(true);
+        StartCoroutine(TypewriterSequence(clone, message, duration, isHint));
+    }
 
-        // Reset style for narrator messages
-        if (!isHint)
+    private IEnumerator TypewriterSequence(GameObject panel, string message, float duration, bool isHint)
+    {
+        CanvasGroup cg = panel.GetComponent<CanvasGroup>();
+        Text prefixText = panel.transform.Find("Prefix").GetComponent<Text>();
+        Text narratorText = panel.transform.Find("Message").GetComponent<Text>();
+
+        // Style
+        if (isHint)
         {
-            _prefixText.gameObject.SetActive(true);
-            _prefixText.text = "AI >";
-            _narratorText.color = _textColor;
-            _narratorText.fontStyle = FontStyle.Normal;
-            _narratorText.fontSize = baseFontSize;
+            prefixText.gameObject.SetActive(false);
+            narratorText.color = _hintColor;
+            narratorText.fontStyle = FontStyle.Italic;
+            narratorText.fontSize = Mathf.RoundToInt(16 * (baseFontSize / 18f));
+            
+            // Adjust message text bounds to fill the prefix area too!
+            RectTransform textRT = narratorText.rectTransform;
+            textRT.anchoredPosition = new Vector2(20 * (baseFontSize / 18f), 0);
+            textRT.sizeDelta = new Vector2(-40 * (baseFontSize / 18f), -20 * (baseFontSize / 18f));
         }
 
         // Fade in
-        _narratorText.text = "";
+        narratorText.text = "";
         float elapsed = 0f;
         while (elapsed < fadeInDuration)
         {
             elapsed += Time.deltaTime;
-            _canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeInDuration);
+            cg.alpha = Mathf.Lerp(0f, 1f, elapsed / fadeInDuration);
             yield return null;
         }
-        _canvasGroup.alpha = 1f;
+        cg.alpha = 1f;
 
         // Typewriter effect
         float charInterval = 1f / charsPerSecond;
         for (int i = 0; i < message.Length; i++)
         {
-            _narratorText.text = message.Substring(0, i + 1);
+            narratorText.text = message.Substring(0, i + 1);
             yield return new WaitForSeconds(charInterval);
         }
 
@@ -137,12 +130,12 @@ public class NarratorUI : MonoBehaviour
         while (elapsed < fadeOutDuration)
         {
             elapsed += Time.deltaTime;
-            _canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
+            cg.alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
             yield return null;
         }
-        _canvasGroup.alpha = 0f;
-        _isShowing = false;
-        _activeCoroutine = null;
+
+        // Clean up
+        Destroy(panel);
     }
 
     // ═══ UI Builder ═════════════════════════════════════════════════
@@ -162,36 +155,56 @@ public class NarratorUI : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920, 1080);
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        // ── Panel (bottom bar) ──
-        GameObject panelObj = new GameObject("Panel");
-        panelObj.transform.SetParent(canvasObj.transform, false);
-        _panel = panelObj.AddComponent<RectTransform>();
-        _panel.anchorMin = new Vector2(0.15f, 0);
-        _panel.anchorMax = new Vector2(0.85f, 0);
-        _panel.pivot = new Vector2(0.5f, 0);
-        _panel.anchoredPosition = new Vector2(0, 40 * scale);
-        _panel.sizeDelta = new Vector2(0, 80 * scale);
+        // ── Flexible Vertical Container ──
+        GameObject containerObj = new GameObject("MessageStackContainer");
+        containerObj.transform.SetParent(canvasObj.transform, false);
+        RectTransform containerRT = containerObj.AddComponent<RectTransform>();
+        containerRT.anchorMin = new Vector2(0.15f, 0);
+        containerRT.anchorMax = new Vector2(0.85f, 1);
+        containerRT.pivot = new Vector2(0.5f, 0);
+        containerRT.anchoredPosition = new Vector2(0, 40 * scale);
+        containerRT.sizeDelta = new Vector2(0, -80 * scale);
 
-        _panelBg = panelObj.AddComponent<Image>();
-        _panelBg.color = _bgColor;
-        _panelBg.raycastTarget = false;
+        var vlg = containerObj.AddComponent<VerticalLayoutGroup>();
+        vlg.childAlignment = TextAnchor.LowerCenter;
+        vlg.childControlHeight = true;
+        vlg.childControlWidth = true;
+        vlg.childForceExpandHeight = false;
+        vlg.childForceExpandWidth = true;
+        vlg.spacing = 10 * scale;
 
-        _canvasGroup = panelObj.AddComponent<CanvasGroup>();
-        _canvasGroup.blocksRaycasts = false;
-        _canvasGroup.interactable = false;
+        _messageContainer = containerObj.transform;
+
+        // ── Message Box Prefab ──
+        _messagePrefab = new GameObject("NarratorLine_Prefab");
+        _messagePrefab.SetActive(false); // Hide the template
+        _messagePrefab.transform.SetParent(transform, false); 
+        
+        // Let LayoutGroup control height rigidly
+        var le = _messagePrefab.AddComponent<LayoutElement>();
+        le.minHeight = 80 * scale;
+
+        Image panelBg = _messagePrefab.AddComponent<Image>();
+        panelBg.color = _bgColor;
+        panelBg.raycastTarget = false;
+
+        CanvasGroup cg = _messagePrefab.AddComponent<CanvasGroup>();
+        cg.blocksRaycasts = false;
+        cg.interactable = false;
+        cg.alpha = 0f;
 
         // ── Prefix ("AI >") ──
         GameObject prefixObj = new GameObject("Prefix");
-        prefixObj.transform.SetParent(panelObj.transform, false);
-        _prefixText = prefixObj.AddComponent<Text>();
-        _prefixText.text = "AI >";
-        _prefixText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _prefixText.fontSize = Mathf.RoundToInt(14 * scale);
-        _prefixText.fontStyle = FontStyle.Bold;
-        _prefixText.color = _prefixColor;
-        _prefixText.alignment = TextAnchor.MiddleLeft;
-        _prefixText.raycastTarget = false;
-        RectTransform prefRT = _prefixText.rectTransform;
+        prefixObj.transform.SetParent(_messagePrefab.transform, false);
+        Text prefixText = prefixObj.AddComponent<Text>();
+        prefixText.text = "AI >";
+        prefixText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        prefixText.fontSize = Mathf.RoundToInt(14 * scale);
+        prefixText.fontStyle = FontStyle.Bold;
+        prefixText.color = _prefixColor;
+        prefixText.alignment = TextAnchor.MiddleLeft;
+        prefixText.raycastTarget = false;
+        RectTransform prefRT = prefixText.rectTransform;
         prefRT.anchorMin = new Vector2(0, 0);
         prefRT.anchorMax = new Vector2(0, 1);
         prefRT.pivot = new Vector2(0, 0.5f);
@@ -200,26 +213,26 @@ public class NarratorUI : MonoBehaviour
 
         // ── Message Text ──
         GameObject textObj = new GameObject("Message");
-        textObj.transform.SetParent(panelObj.transform, false);
-        _narratorText = textObj.AddComponent<Text>();
-        _narratorText.text = "";
-        _narratorText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _narratorText.fontSize = baseFontSize;
-        _narratorText.color = _textColor;
-        _narratorText.alignment = TextAnchor.MiddleLeft;
-        _narratorText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        _narratorText.verticalOverflow = VerticalWrapMode.Overflow;
-        _narratorText.raycastTarget = false;
-        RectTransform textRT = _narratorText.rectTransform;
+        textObj.transform.SetParent(_messagePrefab.transform, false);
+        Text narratorText = textObj.AddComponent<Text>();
+        narratorText.text = "";
+        narratorText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        narratorText.fontSize = baseFontSize;
+        narratorText.color = _textColor;
+        narratorText.alignment = TextAnchor.MiddleLeft;
+        narratorText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        narratorText.verticalOverflow = VerticalWrapMode.Overflow;
+        narratorText.raycastTarget = false;
+        RectTransform textRT = narratorText.rectTransform;
         textRT.anchorMin = new Vector2(0, 0);
         textRT.anchorMax = new Vector2(1, 1);
         textRT.pivot = new Vector2(0, 0.5f);
         textRT.anchoredPosition = new Vector2(75 * scale, 0);
         textRT.sizeDelta = new Vector2(-100 * scale, -20 * scale);
 
-        // ── Accent line (top edge of panel) ──
+        // ── Accent line ──
         GameObject lineObj = new GameObject("AccentLine");
-        lineObj.transform.SetParent(panelObj.transform, false);
+        lineObj.transform.SetParent(_messagePrefab.transform, false);
         RectTransform lineRT = lineObj.AddComponent<RectTransform>();
         lineRT.anchorMin = new Vector2(0, 1);
         lineRT.anchorMax = new Vector2(1, 1);
