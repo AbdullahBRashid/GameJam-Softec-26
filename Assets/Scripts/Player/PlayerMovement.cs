@@ -61,18 +61,14 @@ public class PlayerMovement : MonoBehaviour
         // Look for the animator on the child object
         anim = GetComponentInChildren<Animator>();
         _baseGravity = gravity;
-    }
 
-    private void OnEnable()
-    {
-        // Subscribe to Volatility Bug events
         GameEventManager.OnControlsInverted += HandleControlsInverted;
         GameEventManager.OnGravityReversed += HandleGravityReversed;
         GameEventManager.OnGravityDrift += HandleGravityDrift;
         GameEventManager.OnInertiaCorruption += HandleInertiaCorruption;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         GameEventManager.OnControlsInverted -= HandleControlsInverted;
         GameEventManager.OnGravityReversed -= HandleGravityReversed;

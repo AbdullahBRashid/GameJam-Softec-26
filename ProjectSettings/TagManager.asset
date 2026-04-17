@@ -6,6 +6,7 @@ TagManager:
   tags:
   - AttributeReady
   - Mirror
+  - Balloon
   layers:
   - Default
   - TransparentFX

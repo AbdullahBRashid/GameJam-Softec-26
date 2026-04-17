@@ -15,6 +15,7 @@ public class DeathScreenUI : MonoBehaviour
 
     private PlayerMovement _playerMovement;
     private MonoBehaviour _cinemachineInputController;
+    private InteractionSystem _interactionSystem;
 
     private void Awake()
     {
@@ -37,6 +38,7 @@ public class DeathScreenUI : MonoBehaviour
         if (player != null)
         {
             _playerMovement = player.GetComponent<PlayerMovement>();
+            _interactionSystem = player.GetComponent<InteractionSystem>();
         }
 
         // Find Cinemachine input controller
@@ -62,6 +64,11 @@ public class DeathScreenUI : MonoBehaviour
 
     private void ShowDeathScreen()
     {
+        if (_interactionSystem != null && _interactionSystem.IsPanelOpen)
+        {
+            _interactionSystem.ClosePanel();
+        }
+
         if (deathPanel != null)
             deathPanel.SetActive(true);
 

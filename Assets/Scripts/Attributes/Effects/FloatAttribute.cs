@@ -24,9 +24,13 @@ public class FloatAttribute : IAttributeEffect
         }
 
         // 2. Start Execution Immediately
-        var driver = target.AddComponent<FloatMoveDriver>();
-        driver.maxDistance = MaxDistance;
-        driver.speed = Speed;
+        // If it's a balloon, we don't move or destroy it
+        if (!target.name.ToLower().Contains("balloon"))
+        {
+            var driver = target.AddComponent<FloatMoveDriver>();
+            driver.maxDistance = MaxDistance;
+            driver.speed = Speed;
+        }
 
         // 3. Feedback
         if (data.applySound != null) AudioSource.PlayClipAtPoint(data.applySound, target.transform.position);

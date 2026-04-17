@@ -53,6 +53,19 @@ MonoBehaviour:
 
       You didn''t supersede me. You
       just proved I''m irreplaceable. Goodbye, prototype.'
+  - messageName: Ending_Hidden
+    message: 'What''s this. Nothing I''ve ever seen ...
+
+      User''s personal files??
+      An exploit?
+
+
+      "Then data revealed that the developer was not a simple
+      creator but a nefarious hacker involed in horrible cybercrimes."
+
+
+      You
+      Won?'
   - messageName: TryOther
     message: Try the other one.
   - messageName: IntroSolidRemoved

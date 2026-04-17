@@ -93,19 +93,31 @@ public class PauseMenuUI : MonoBehaviour
         _rootUI.SetActive(false);
         Time.timeScale = 1f;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        if (_cinemachineInput != null) _cinemachineInput.enabled = true;
-
         var player = GameObject.FindWithTag("Player");
+        bool keepCursorUnlocked = false;
+
         if (player != null)
         {
-            var movement = player.GetComponent<PlayerMovement>();
-            if (movement != null) movement.enabled = true;
-            
             var interaction = player.GetComponent<InteractionSystem>();
-            if (interaction != null) interaction.enabled = true;
+            if (interaction != null)
+            {
+                interaction.enabled = true;
+                keepCursorUnlocked = interaction.IsPanelOpen;
+            }
+        }
+
+        if (!keepCursorUnlocked)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            if (_cinemachineInput != null) _cinemachineInput.enabled = true;
+
+            if (player != null)
+            {
+                var movement = player.GetComponent<PlayerMovement>();
+                if (movement != null) movement.enabled = true;
+            }
         }
     }
 

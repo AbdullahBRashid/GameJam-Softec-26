@@ -45,6 +45,7 @@ public class InteractionSystem : MonoBehaviour
     // ── Cached References ──
     private AttributeInventory _inventory;
     private AttributeController _currentTarget;
+    public bool IsPanelOpen => _panelOpen;
     private bool _panelOpen = false;
 
     // ── Discard Menu ──

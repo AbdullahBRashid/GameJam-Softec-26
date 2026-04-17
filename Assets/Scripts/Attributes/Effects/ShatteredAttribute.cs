@@ -2,34 +2,33 @@ using UnityEngine;
 
 /// <summary>
 /// Toggles a glass wall from solid to shattered so the player can walk through it.
-/// Requires the target to have the ShatteredWallState component attached.
+/// It toggles between the children of the target object.
+/// Assumes Child 0 is the fixed wall and Child 1 is the shattered wall.
 /// </summary>
 public class ShatteredAttribute : IAttributeEffect
 {
     public void Apply(GameObject target, AttributeSO attribute)
     {
-        ShatteredWallState state = target.GetComponent<ShatteredWallState>();
-        if (state != null)
+        if (target.transform.childCount >= 2)
         {
-            if (state.intactModel != null) state.intactModel.SetActive(false);
-            if (state.shatteredModel != null) state.shatteredModel.SetActive(true);
+            target.transform.GetChild(0).gameObject.SetActive(false);
+            target.transform.GetChild(1).gameObject.SetActive(true);
             
             GameEventManager.NarratorSpeak("shatteredCritical", 2f);
             Debug.Log($"[ShatteredAttribute] Wall {target.name} shattered.");
         }
         else
         {
-            Debug.LogWarning($"[ShatteredAttribute] Applied to {target.name}, but missing ShatteredWallState component!");
+            Debug.LogWarning($"[ShatteredAttribute] Applied to {target.name}, but it does not have at least 2 children!");
         }
     }
 
     public void Remove(GameObject target, AttributeSO attribute)
     {
-        ShatteredWallState state = target.GetComponent<ShatteredWallState>();
-        if (state != null)
+        if (target.transform.childCount >= 2)
         {
-            if (state.intactModel != null) state.intactModel.SetActive(true);
-            if (state.shatteredModel != null) state.shatteredModel.SetActive(false);
+            target.transform.GetChild(0).gameObject.SetActive(true);
+            target.transform.GetChild(1).gameObject.SetActive(false);
             
             Debug.Log($"[ShatteredAttribute] Wall {target.name} restored to solid.");
         }
