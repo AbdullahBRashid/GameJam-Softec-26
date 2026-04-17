@@ -24,6 +24,10 @@ public class PlayerMovement : MonoBehaviour
     public float jumpBufferTime = 0.1f;
     private float _jumpBufferCounter;
 
+    [Header("World Bounds")]
+    [Tooltip("If the player falls below this world Y position, they die immediately.")]
+    [SerializeField] private float fallDeathY = -25f;
+
     // ── Volatility Bug State ──
     private bool _controlsInverted = false;
     private bool _gravityReversed = false;
@@ -121,7 +125,20 @@ public class PlayerMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
+        CheckFallDeath();
+
         UpdateAnimator(move);
+    }
+
+    private void CheckFallDeath()
+    {
+        if (transform.position.y > fallDeathY) return;
+
+        PlayerHealth health = GetComponent<PlayerHealth>();
+        if (health != null)
+        {
+            health.Kill();
+        }
     }
 
     void UpdateAnimator(Vector3 move)

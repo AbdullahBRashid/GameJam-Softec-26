@@ -66,6 +66,16 @@ public class PlayerHealth : MonoBehaviour
         GameEventManager.PlayerHealthChanged(_currentHealth, maxHealth);
     }
 
+    /// <summary>
+    /// Kills the player immediately, ignoring damage cooldown.
+    /// Useful for out-of-bounds deaths and other instant-fail conditions.
+    /// </summary>
+    public void Kill()
+    {
+        if (_currentHealth <= 0) return;
+        Die();
+    }
+
     private void Die()
     {
         _currentHealth = 0;

@@ -18,6 +18,7 @@ public class Clock : MonoBehaviour {
 
     //-- internal vars
     float msecs=0;
+    private bool _isTimeRunning = true;
 
 void Start() 
 {
@@ -28,10 +29,32 @@ void Start()
 		minutes=System.DateTime.Now.Minute;
 		seconds=System.DateTime.Now.Second;
 	}
+
+    _isTimeRunning = GameEventManager.IsTimeRunning;
+}
+
+void OnEnable()
+{
+    GameEventManager.OnTimeStateChanged += HandleTimeStateChanged;
+}
+
+void OnDisable()
+{
+    GameEventManager.OnTimeStateChanged -= HandleTimeStateChanged;
+}
+
+private void HandleTimeStateChanged(bool isRunning)
+{
+    _isTimeRunning = isRunning;
 }
 
 void Update() 
 {
+    if (!_isTimeRunning)
+    {
+        return;
+    }
+
     //-- calculate time
     msecs += Time.deltaTime * clockSpeed;
     if(msecs >= 1.0f)
