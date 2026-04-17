@@ -28664,7 +28664,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c60362e5cca22084db704b11e1dd6fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NarratorTrigger
-  messageName: level2entrance
+  messageName: Level2Intro
   displayDuration: 4
   delayInSeconds: 0
   triggerOnlyOnce: 1
@@ -32134,7 +32134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   fadeDuration: 1.5
-  maxMusicVolume: 0.1
+  maxMusicVolume: 0.05
 --- !u!1 &1563182099 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 596158413587155261, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}
