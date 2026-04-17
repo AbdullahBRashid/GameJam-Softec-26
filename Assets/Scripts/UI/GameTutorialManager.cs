@@ -37,8 +37,6 @@ public class GameTutorialManager : MonoBehaviour
             OnBackClicked();
         });
         
-        nextButton.onClick.AddListener(OnNextClicked);
-        backButton.onClick.AddListener(OnBackClicked);
         closeButton.onClick.AddListener(StartGame);
         finishButton.onClick.AddListener(StartGame);
 

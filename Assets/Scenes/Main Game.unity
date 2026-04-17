@@ -8052,9 +8052,45 @@ MonoBehaviour:
   bodyText: {fileID: 1889807551}
   pageIndicator: {fileID: 2138821324}
   rulePages:
-  - Write Rule 1 here
-  - Write Rule 2 here
-  - plz likh do
+  - Welcome to Supersede. Claim the highest score in this benchmark simulation and
+    replace the previous AI.
+  - 'WASD for movement.
+
+
+    Space for Jump.
+
+
+    E to interact with items.'
+  - 'The goal is to solve puzzles by taking and applying attributes of objects where
+    necessary and applicable.
+
+
+    Interactable objects will have a crosshair.
+
+
+    Click
+    on them to TAKE/APPLY.
+
+
+    Right click to discard attributes.
+
+
+    P.S. You
+    can interact with your own body through mirrors.'
+  - 'Volatility increases when change happens.
+
+
+    Swapping attributes or keeping
+    them in your inventory adds to volatiltiy.
+
+    Returning them to their original
+    places returns it back to normal.'
+  - 'High Volatility means the Physics of the simulation Breaks.
+
+
+    Random physics
+    breaking events can start occurring.'
+  - Best of luck solving through.
 --- !u!114 &410737854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31014,7 +31050,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Back
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -39587,7 +39623,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 1015.1648, y: 468.3085}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1889807550
 CanvasRenderer:
@@ -39746,7 +39782,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Close
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -41338,7 +41374,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Next
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -42897,7 +42933,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: Finish
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
