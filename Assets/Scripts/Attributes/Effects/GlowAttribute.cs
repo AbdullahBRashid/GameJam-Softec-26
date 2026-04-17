@@ -17,7 +17,14 @@ public class GlowAttribute : IAttributeEffect
         // 1. Spawn a soft, atmospheric organic light ONLY if it is the Player
         if (target.CompareTag("Player"))
         {
-            _bodyLight = target.AddComponent<Light>();
+            // Unity restricts game objects to exactly 1 Light component.
+            // We spawn a dedicated child object so we don't crash if the player already has a light, 
+            // or if the previous light is still pending garbage collection from a recent Remove() call!
+            GameObject lightHost = new GameObject("Glow_BodyLight");
+            lightHost.transform.SetParent(target.transform, false);
+            lightHost.transform.localPosition = Vector3.up * 1f; // Nudge it into the chest area
+
+            _bodyLight = lightHost.AddComponent<Light>();
             _bodyLight.type = LightType.Point;         
             _bodyLight.color = glowColor;
             
@@ -34,7 +41,7 @@ public class GlowAttribute : IAttributeEffect
         {
             foreach (var mat in rend.materials)
             {
-                if (mat.HasProperty("_EmissionColor"))
+                if (mat != null && mat.HasProperty("_EmissionColor"))
                 {
                     mat.EnableKeyword("_EMISSION");
                     mat.SetColor("_EmissionColor", glowColor * 2.5f); // Pop!
@@ -47,10 +54,10 @@ public class GlowAttribute : IAttributeEffect
 
     public void Remove(GameObject target, AttributeSO attribute)
     {
-        // 1. Destroy the light source
+        // 1. Destroy the light source AND its host object
         if (_bodyLight != null)
         {
-            Object.Destroy(_bodyLight);
+            Object.Destroy(_bodyLight.gameObject);
         }
 
         // 2. Force Disable all emission! 
@@ -61,7 +68,7 @@ public class GlowAttribute : IAttributeEffect
         {
             foreach (var mat in rend.materials)
             {
-                if (mat.HasProperty("_EmissionColor"))
+                if (mat != null && mat.HasProperty("_EmissionColor"))
                 {
                     mat.SetColor("_EmissionColor", Color.black);
                     mat.DisableKeyword("_EMISSION");
