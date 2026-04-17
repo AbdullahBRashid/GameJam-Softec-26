@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// Raycast-based interaction system with UI selection panel.
@@ -46,6 +47,11 @@ public class InteractionSystem : MonoBehaviour
     private AttributeController _currentTarget;
     private bool _panelOpen = false;
 
+    // ── Discard Menu ──
+    private GameObject _discardMenuRoot;
+    private RectTransform _discardMenuRT;
+    private AttributeSO _currentDiscardAttr;
+
     // ── Components to disable when panel is open ──
     private PlayerMovement _playerMovement;
     private PlayerInput _playerInput;
@@ -78,6 +84,11 @@ public class InteractionSystem : MonoBehaviour
                 _cinemachineInputController = mb;
                 break;
             }
+        }
+
+        if (interactionPanel != null)
+        {
+            BuildDiscardMenu(interactionPanel.transform);
         }
     }
 
@@ -246,9 +257,6 @@ public class InteractionSystem : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (_playerInput != null)
-            _playerInput.DeactivateInput();
-
         // Freeze player movement
         if (_playerMovement != null)
         {
@@ -268,12 +276,11 @@ public class InteractionSystem : MonoBehaviour
         if (interactionPanel != null)
             interactionPanel.SetActive(false);
 
+        HideDiscardMenu();
+
         // Re-lock cursor for FPS controls
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        if (_playerInput != null)
-            _playerInput.ActivateInput();
 
         // Re-enable player movement
         if (_playerMovement != null)
@@ -385,6 +392,18 @@ public class InteractionSystem : MonoBehaviour
             var tmpText = btn.GetComponentInChildren<TMPro.TextMeshProUGUI>();
             if (tmpText != null) { tmpText.text = isCompatible ? $"Apply: {attr.displayName} (-{reduction:F0})" : $"<color=#E74C3C>Incompatible: {attr.displayName}</color>"; tmpText.richText = true; }
         }
+
+        // Add Right-Click to discard
+        EventTrigger trigger = btn.AddComponent<EventTrigger>();
+        EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+        entry.callback.AddListener((data) => {
+            PointerEventData pData = (PointerEventData)data;
+            if (pData.button == PointerEventData.InputButton.Right)
+            {
+                ShowDiscardMenu(attr, pData.position);
+            }
+        });
+        trigger.triggers.Add(entry);
     }
 
     // ═══ Button Click Handlers ══════════════════════════════════════
@@ -429,7 +448,7 @@ public class InteractionSystem : MonoBehaviour
         {
             Debug.Log($"[InteractionSystem] Cannot apply '{attr.displayName}' here.");
             StartCoroutine(ShakeButtonCoroutine(btn));
-            GameEventManager.NarratorSpeak("I can't put that there.", 2f);
+            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("cannotApply"), 2f);
             return;
         }
 
@@ -536,6 +555,85 @@ public class InteractionSystem : MonoBehaviour
         if (_playerInput != null) _playerInput.ActivateInput();
         if (_playerMovement != null) _playerMovement.enabled = true;
         if (_cinemachineInputController != null) _cinemachineInputController.enabled = true;
+    }
+
+    // ═══ Discard Menu ═══════════════════════════════════════════════
+
+    private void BuildDiscardMenu(Transform canvasTransform)
+    {
+        GameObject blockerObj = new GameObject("DiscardBlocker");
+        blockerObj.transform.SetParent(canvasTransform, false);
+        RectTransform blockerRT = blockerObj.AddComponent<RectTransform>();
+        blockerRT.anchorMin = Vector2.zero;
+        blockerRT.anchorMax = Vector2.one;
+        blockerRT.sizeDelta = Vector2.zero;
+        UnityEngine.UI.Image blockerImg = blockerObj.AddComponent<UnityEngine.UI.Image>();
+        blockerImg.color = new Color(0, 0, 0, 0);
+        blockerImg.raycastTarget = true;
+        
+        EventTrigger blockerTrigger = blockerObj.AddComponent<EventTrigger>();
+        EventTrigger.Entry blockerEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+        blockerEntry.callback.AddListener((data) => HideDiscardMenu());
+        blockerTrigger.triggers.Add(blockerEntry);
+
+        GameObject menuObj = new GameObject("DiscardMenu");
+        menuObj.transform.SetParent(blockerObj.transform, false);
+        _discardMenuRT = menuObj.AddComponent<RectTransform>();
+        _discardMenuRT.sizeDelta = new Vector2(100, 36);
+        _discardMenuRT.pivot = new Vector2(0, 1);
+        UnityEngine.UI.Image menuBg = menuObj.AddComponent<UnityEngine.UI.Image>();
+        menuBg.color = new Color(0.12f, 0.12f, 0.14f, 0.98f);
+        menuBg.raycastTarget = true;
+        UnityEngine.UI.Button discardBtn = menuObj.AddComponent<UnityEngine.UI.Button>();
+        discardBtn.onClick.AddListener(OnDiscardClicked);
+
+        GameObject textObj = new GameObject("Text");
+        textObj.transform.SetParent(menuObj.transform, false);
+        UnityEngine.UI.Text text = textObj.AddComponent<UnityEngine.UI.Text>();
+        text.text = "Discard";
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.fontSize = 14;
+        text.fontStyle = FontStyle.Bold;
+        text.color = new Color(0.95f, 0.3f, 0.25f, 1f);
+        text.alignment = TextAnchor.MiddleCenter;
+        text.raycastTarget = false;
+        RectTransform textRT = text.rectTransform;
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.sizeDelta = Vector2.zero;
+
+        _discardMenuRoot = blockerObj;
+        _discardMenuRoot.SetActive(false);
+    }
+
+    private void ShowDiscardMenu(AttributeSO attr, Vector2 screenPos)
+    {
+        _currentDiscardAttr = attr;
+        _discardMenuRoot.SetActive(true);
+        _discardMenuRoot.transform.SetAsLastSibling();
+        
+        RectTransform canvasRT = interactionPanel.GetComponent<RectTransform>();
+        if (canvasRT != null)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRT, screenPos, null, out Vector2 localPoint);
+            _discardMenuRT.anchoredPosition = localPoint;
+        }
+    }
+
+    private void HideDiscardMenu()
+    {
+        if (_discardMenuRoot != null) _discardMenuRoot.SetActive(false);
+        _currentDiscardAttr = null;
+    }
+
+    private void OnDiscardClicked()
+    {
+        if (_currentDiscardAttr != null && _inventory != null)
+        {
+            _inventory.RemoveAttribute(_currentDiscardAttr);
+            PopulatePanel();
+        }
+        HideDiscardMenu();
     }
 
     // ═══ Helpers ════════════════════════════════════════════════════

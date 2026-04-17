@@ -9,9 +9,8 @@ using System.Collections;
 public class NarratorTrigger : MonoBehaviour
 {
     [Header("Narrator Message")]
-    [TextArea(2, 5)]
-    [Tooltip("The text the narrator will say.")]
-    public string dialogueText = "Narrator says something here...";
+    [Tooltip("The query key for the narrator line in NarratorLinesSO.")]
+    public string messageName = "IntroMessage";
     public float displayDuration = 4f;
 
     [Header("Timing & Setup")]
@@ -81,9 +80,10 @@ public class NarratorTrigger : MonoBehaviour
             yield return new WaitForSeconds(delayInSeconds);
         }
 
-        Debug.Log($"[NarratorTrigger] Firing event: \"{dialogueText}\"");
+        string actualText = NarratorLinesSO.Instance.GetLine(messageName);
+        Debug.Log($"[NarratorTrigger] Firing event for '{messageName}': \"{actualText}\"");
         // Show UI text using the existing central event system
-        GameEventManager.NarratorSpeak(dialogueText, displayDuration);
+        GameEventManager.NarratorSpeak(actualText, displayDuration);
 
         // Play optional audio
         if (voiceLine != null && _audioSource != null)

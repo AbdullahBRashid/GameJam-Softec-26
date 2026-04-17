@@ -79,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnJump()
     {
+        if (!enabled) return;
         _jumpBufferCounter = jumpBufferTime;
     }
 

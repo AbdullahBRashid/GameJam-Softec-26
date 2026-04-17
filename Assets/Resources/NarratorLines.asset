@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56a93f80ef9b3442ca31310dcc4fcbcf, type: 3}
+  m_Name: NarratorLines
+  m_EditorClassIdentifier: Assembly-CSharp::NarratorLinesSO
+  lines:
+  - messageName: inventoryFull
+    message: Your pockets are full. Drop something first.
+  - messageName: cannotApply
+    message: I can't put that there.
+  - messageName: doorLocked
+    message: It won't budge. Time is standing still.
+  - messageName: keyUsed
+    message: 'WARNING: Unauthorized system override detected. Security protocol bypassed.'
+  - messageName: shatteredCritical
+    message: Structural integrity critical.
+  - messageName: IntroMessage
+    message: Welcome to the facility. Anomaly detected.
+  - messageName: ExitMessage
+    message: Evacuation required immediately.
+  - messageName: RemoveLockFromLockedDoor
+    message: Let's not get distracted here, this room doens't need any testing. Please
+      proceed to the next stage instead.
+  - messageName: GenericRemoveLockedAttribute
+    message: Nice try, but that one stays.
+  - messageName: tipRemoveSolidAttribute
+    message: Try taking off the solid attribute to pass through.
+  - messageName: tipUnlockDoors
+    message: Left Click to open doors after unlocking them.

@@ -22,8 +22,8 @@ public class GlowAttribute : IAttributeEffect
             _bodyLight.color = glowColor;
             
             // Smoother, softer values for a lantern-like body glow
-            _bodyLight.range = 15f; 
-            _bodyLight.intensity = 1.5f;
+            _bodyLight.range = 25f; 
+            _bodyLight.intensity = 10f;
             _bodyLight.shadows = LightShadows.Soft;
             _bodyLight.shadowStrength = 0.5f; // Softer shadows 
         }
