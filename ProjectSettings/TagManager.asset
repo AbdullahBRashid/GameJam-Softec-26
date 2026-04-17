@@ -11,11 +11,11 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ceiling
+  - book
   - Water
   - UI
   - Interactable
-  - 
+  - ceiling
   - 
   - 
   - 
@@ -43,6 +43,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: book
+    uniqueID: 188835153
+    locked: 0
+  - name: UI
+    uniqueID: 2223082605
     locked: 0
   m_RenderingLayers:
   - Default
