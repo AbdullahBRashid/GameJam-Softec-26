@@ -78,3 +78,5 @@ crashlytics-build.properties
 *.slnx
 .idea
 .vscode
+
+.DS_Store
