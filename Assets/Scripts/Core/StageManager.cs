@@ -210,6 +210,26 @@ public class StageManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Instantly teleports the player to a given stage's spawn point bypassing checklists and resets.
+    /// </summary>
+    public void TeleportToStage(int stageIndex)
+    {
+        if (player == null) return;
+        var cc = player.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        if (_stageZones.TryGetValue(stageIndex, out StageZone zone) && zone.spawnPoint != null)
+        {
+            player.transform.position = zone.spawnPoint.position;
+            player.transform.rotation = zone.spawnPoint.rotation;
+            Debug.Log($"[StageManager] Teleported instantly to stage {stageIndex}.");
+        }
+
+        if (cc != null) cc.enabled = true;
+        Physics.SyncTransforms();
+    }
+
     private void HandlePlayerDied()
     {
         Debug.Log("[StageManager] Player died. Awaiting UI retry...");

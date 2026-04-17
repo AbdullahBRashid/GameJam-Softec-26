@@ -340,6 +340,13 @@ public class InteractionSystem : MonoBehaviour
     {
         if (_currentTarget == null) return;
 
+        // --- NEW: Special Key Teleport Sequence ---
+        if (attr.attributeID.ToLower() == "key")
+        {
+            StartCoroutine(KeyTeleportSequence(attr, _currentTarget));
+            return;
+        }
+
         bool wasDefault = _currentTarget.IsDefaultAttribute(attr);
         GameObject sourceObj = _currentTarget.gameObject;
 
@@ -407,6 +414,67 @@ public class InteractionSystem : MonoBehaviour
         
         if (btn != null && rt != null)
             rt.anchoredPosition3D = originalPos;
+    }
+
+    private System.Collections.IEnumerator KeyTeleportSequence(AttributeSO keyAttr, AttributeController target)
+    {
+        // 1. Delete the key from the scene permanently
+        target.RemoveAttribute(keyAttr);
+        ClosePanel(); // Note: ClosePanel re-enables input, so we immediately disable it again below.
+
+        // --- DISABLE INPUT FOR CUTSCENE ---
+        if (_playerInput != null) _playerInput.DeactivateInput();
+        if (_playerMovement != null) _playerMovement.enabled = false;
+        if (_cinemachineInputController != null) _cinemachineInputController.enabled = false;
+
+        // 2. Camera Shake via Volatility system
+        GameEventManager.MechanicalBugTriggered(MechanicalBugType.CameraShake);
+
+        // 3. Fade in Black
+        GameObject canvasObj = new GameObject("FadeCanvas");
+        Canvas c = canvasObj.AddComponent<Canvas>();
+        c.renderMode = RenderMode.ScreenSpaceOverlay;
+        c.sortingOrder = 999;
+        
+        GameObject imgObj = new GameObject("FadeImage");
+        imgObj.transform.SetParent(canvasObj.transform, false);
+        UnityEngine.UI.Image fadeImage = imgObj.AddComponent<UnityEngine.UI.Image>();
+        fadeImage.color = new Color(0, 0, 0, 0);
+        RectTransform rt = fadeImage.rectTransform;
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+
+        float t = 0;
+        float fadeTime = 2.0f;
+        while(t < fadeTime)
+        {
+            t += Time.unscaledDeltaTime;
+            fadeImage.color = new Color(0, 0, 0, t / fadeTime);
+            yield return null;
+        }
+
+        // 4. Teleport to stage 1
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.TeleportToStage(1);
+        }
+
+        // 5. Fade out Black
+        t = 0;
+        while(t < fadeTime)
+        {
+            t += Time.unscaledDeltaTime;
+            fadeImage.color = new Color(0, 0, 0, 1f - (t / fadeTime));
+            yield return null;
+        }
+
+        GameEventManager.MechanicalBugEnded(MechanicalBugType.CameraShake);
+        Destroy(canvasObj);
+
+        // --- RE-ENABLE INPUT AFTER CUTSCENE ---
+        if (_playerInput != null) _playerInput.ActivateInput();
+        if (_playerMovement != null) _playerMovement.enabled = true;
+        if (_cinemachineInputController != null) _cinemachineInputController.enabled = true;
     }
 
     // ═══ Helpers ════════════════════════════════════════════════════

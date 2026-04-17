@@ -25,6 +25,7 @@ public static class AttributeEffectFactory
             "locked"        => new LockedAttribute(),
             "temporal"      => new TemporalAttribute(),
             "solid"         => new SolidAttribute(),
+            "key"           => new KeyAttribute(),
             // Add more here as you create new effects:
             // "magnetic"   => new MagneticAttribute(),
             // "explosive"  => new ExplosiveAttribute(),

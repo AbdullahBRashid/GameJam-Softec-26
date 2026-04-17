@@ -127,6 +127,15 @@ public class AttributeController : MonoBehaviour
     public bool CanAccept(AttributeSO attribute)
     {
         if (attribute == null) return false;
+
+        // ── SPECIAL RULE: System Override Key ──
+        if (attribute.attributeID.ToLower() == "key")
+        {
+            // A Key can ONLY be applied to an object where the AI Director has explicitly locked it.
+            // Bypasses all capacity / whitelist logic entirely because it's a breaker tool.
+            return isLocked;
+        }
+
         if (IsFull) return false;
         if (HasAttribute(attribute)) return false;
         if (!IsLocallyCompatible(attribute)) return false;
