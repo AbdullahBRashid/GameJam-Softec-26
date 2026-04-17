@@ -14,16 +14,16 @@ GameObject:
   - component: {fileID: 8122865277419436131}
   - component: {fileID: 5587569830403740506}
   - component: {fileID: 684840139042110257}
-  - component: {fileID: 1757713734796960659}
   - component: {fileID: 8591713376199454719}
-  - component: {fileID: 8747346954675888561}
+  - component: {fileID: 8289062353630772725}
+  - component: {fileID: 6120085286804488741}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2117260856851376137
 Transform:
   m_ObjectHideFlags: 0
@@ -93,6 +93,9 @@ MonoBehaviour:
   speed: 5
   gravity: -19.62
   jumpHeight: 2
+  coyoteTime: 0.1
+  jumpBufferTime: 0.1
+  fallDeathY: -25
 --- !u!114 &5587569830403740506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,7 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractionSystem
   cameraTransform: {fileID: 0}
-  interactRange: 4
+  interactRange: 5
   interactableLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -129,21 +132,6 @@ MonoBehaviour:
   takeButtonContainer: {fileID: 0}
   applyButtonContainer: {fileID: 0}
   attributeButtonPrefab: {fileID: 8527983990015488250, guid: 0b6b47df704043a4ab5f4faee92b8dd2, type: 3}
---- !u!114 &1757713734796960659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 596158413587155261}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 236095cc49f85634e9607cd2e080e5c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  speed: 5
-  gravity: -19.62
-  jumpHeight: 2
 --- !u!114 &8591713376199454719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,7 +162,7 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &8747346954675888561
+--- !u!114 &8289062353630772725
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -183,11 +171,34 @@ MonoBehaviour:
   m_GameObject: {fileID: 596158413587155261}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09f07d22158cf4243bbe3d4b20e06dfa, type: 3}
+  m_Script: {fileID: 11500000, guid: 61d37b068d988ea45a7489f4a3b29417, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AttributeInventory
-  maxCapacity: 5
-  inventory: []
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 5
+  damageCooldown: 0.3
+--- !u!114 &6120085286804488741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 596158413587155261}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 661acf40587f5d64e921fc97126e8580, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttributeController
+  category: 5
+  compatibleAttributes:
+  - {fileID: 11400000, guid: a3feb0e7d11f1a842bb06c7ca922ebb7, type: 2}
+  - {fileID: 11400000, guid: 5795f9968aebef84582cfb2126ffe085, type: 2}
+  defaultAttributes: []
+  activeAttributes: []
+  maxAttributes: 3
+  restrictAllowedAttributes: 0
+  allowedAttributes: []
+  isLocked: 0
+  lockedMessage: Nice try, but that one stays.
 --- !u!1 &7175596948067445962
 GameObject:
   m_ObjectHideFlags: 0
