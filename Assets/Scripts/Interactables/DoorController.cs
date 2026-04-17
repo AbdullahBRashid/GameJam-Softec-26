@@ -58,7 +58,7 @@ public class DoorController : MonoBehaviour
 
         if (!GameEventManager.IsTimeRunning)
         {
-            GameEventManager.NarratorSpeak("It won't budge. Time is standing still.", 2f);
+            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("doorLocked"), 2f);
             return;
         }
 
@@ -89,7 +89,7 @@ public class DoorController : MonoBehaviour
 
         if (!GameEventManager.IsTimeRunning)
         {
-            GameEventManager.NarratorSpeak("It won't budge. Time is standing still.", 2f);
+            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("doorLocked"), 2f);
             return;
         }
 

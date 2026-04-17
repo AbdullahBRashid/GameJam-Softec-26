@@ -17,7 +17,7 @@ public class KeyAttribute : IAttributeEffect
             controller.Unlock();
             
             // 2. Play thematic feedback
-            GameEventManager.NarratorSpeak("WARNING: Unauthorized system override detected. Security protocol bypassed.", 4f);
+            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("keyUsed"), 4f);
             Debug.Log($"[KeyAttribute] System override applied to {target.name}. Object is now completely unlocked.");
             
             // 3. Consume the key permanently (one-time use)

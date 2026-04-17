@@ -95,16 +95,18 @@ public class AIDirector : MonoBehaviour
 
     private void ExecuteSabotage(SabotageEntry entry)
     {
-        Debug.Log($"[AIDirector] 🎭 Sabotage triggered at Level {entry.triggerLevel}: {entry.sabotageType} — \"{entry.narratorText}\"");
+        Debug.Log($"[AIDirector] 🎭 Sabotage triggered at Level {entry.triggerLevel}: {entry.sabotageType} — \"{entry.messageName}\"");
 
         // Narrator speaks
-        if (!string.IsNullOrEmpty(entry.narratorText))
+        string actualText = "";
+        if (!string.IsNullOrEmpty(entry.messageName))
         {
-            GameEventManager.NarratorSpeak(entry.narratorText, entry.narratorDuration);
+            actualText = NarratorLinesSO.Instance.GetLine(entry.messageName);
+            GameEventManager.NarratorSpeak(actualText, entry.narratorDuration);
         }
 
         // Fire global sabotage event
-        GameEventManager.SabotageTriggered(entry.sabotageType, entry.narratorText);
+        GameEventManager.SabotageTriggered(entry.sabotageType, actualText);
 
         // Execute the specific sabotage
         switch (entry.sabotageType)
@@ -208,9 +210,8 @@ public class SabotageEntry
     [Tooltip("Type of sabotage to execute.")]
     public SabotageType sabotageType;
 
-    [Tooltip("What the AI narrator says when this fires.")]
-    [TextArea(2, 4)]
-    public string narratorText;
+    [Tooltip("What the AI narrator says when this fires (MessageName in NarratorLinesSO).")]
+    public string messageName;
 
     [Tooltip("How long the narrator text stays on screen.")]
     public float narratorDuration = 5f;

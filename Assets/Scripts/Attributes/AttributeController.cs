@@ -39,8 +39,8 @@ public class AttributeController : MonoBehaviour
     [Header("Lock State (AI Director)")]
     [Tooltip("If true, attributes cannot be removed from this object.")]
     [SerializeField] private bool isLocked = false;
-    [Tooltip("Message the narrator says if the player tries to take an attribute while this object is locked.")]
-    [SerializeField] private string lockedMessage = "Nice try, but that one stays.";
+    [Tooltip("MessageName in NarratorLinesSO to play if the player tries to take an attribute while this object is locked.")]
+    [SerializeField] private string lockedMessageName = "GenericRemoveLockedAttribute";
 
     // Track the live effect instances so we can call Remove on the exact same instance
     private readonly Dictionary<string, IAttributeEffect> _liveEffects
@@ -254,7 +254,8 @@ public class AttributeController : MonoBehaviour
 
         if (isLocked)
         {
-            GameEventManager.NarratorSpeak(lockedMessage, 3f);
+            string actualText = NarratorLinesSO.Instance.GetLine(lockedMessageName);
+            GameEventManager.NarratorSpeak(actualText, 3f);
             return null;
         }
 

@@ -14,7 +14,7 @@ public class ShatteredAttribute : IAttributeEffect
             if (state.intactModel != null) state.intactModel.SetActive(false);
             if (state.shatteredModel != null) state.shatteredModel.SetActive(true);
             
-            GameEventManager.NarratorSpeak("Structural integrity critical.", 2f);
+            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("shatteredCritical"), 2f);
             Debug.Log($"[ShatteredAttribute] Wall {target.name} shattered.");
         }
         else
