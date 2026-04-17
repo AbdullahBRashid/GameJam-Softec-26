@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 /// <summary>
 /// Player's attribute inventory. Holds attributes the player has "taken"
@@ -26,6 +27,7 @@ public class AttributeInventory : MonoBehaviour
         = new Dictionary<AttributeSO, bool>();
 
     private bool firstAttribute = true;
+    private bool firstTimeStop = true;
 
     // ── Public Properties ───────────────────────────────────────────
     public IReadOnlyList<AttributeSO> Items => inventory;
@@ -65,8 +67,16 @@ public class AttributeInventory : MonoBehaviour
 
         if (firstAttribute && inventory.Count == 1)
         {
-            string actualText = NarratorLinesSO.Instance.GetLine("solidRemoved");
-            GameEventManager.NarratorSpeak(actualText, 3f);
+            GameEventManager.NarratorSpeak("IntroSolidRemoved", 3f);
+            firstAttribute = false;
+        }
+
+        bool hasTemporal = inventory.Any(a => a.attributeID == "temporal");
+
+        if (firstTimeStop && hasTemporal)
+        {
+            GameEventManager.NarratorSpeak("Level3TimeStoppped", 3f);
+            firstTimeStop = false;
         }
         
         return true;

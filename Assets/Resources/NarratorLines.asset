@@ -35,7 +35,7 @@ MonoBehaviour:
   - messageName: tipRemoveSolidAttribute
     message: Try taking off the solid attribute to pass through.
   - messageName: tipUnlockDoors
-    message: Left Click to open doors after unlocking them.
+    message: 'Tip: Left Click to open doors after unlocking them.'
   - messageName: tipLavaBouncy
     message: Bouncy Trampoline? What else can be bouncy...
   - messageName: Ending_Good
@@ -51,3 +51,17 @@ MonoBehaviour:
 
       You didn''t supersede me. You
       just proved I''m irreplaceable. Goodbye, prototype.'
+  - messageName: TryOther
+    message: Try the other one.
+  - messageName: IntroSolidRemoved
+    message: Perfect, you just took away the solid attribute of it, now you can walk
+      through it. Good job!
+  - messageName: Level2Intro
+    message: "There\u2019s a lava pit in your way, and the door is past it. Your
+      job is to get to that door. A bunch of your predecessors failed here, let\u2019s
+      see if you do any better."
+  - messageName: Level2TrampolineTip
+    message: How are we going to tackle this one? Try using the trampoline.
+  - messageName: Level2Success
+    message: Alright! You made it! You took a big hit, try going on over to the green
+      button on the ground and get up to max health.
