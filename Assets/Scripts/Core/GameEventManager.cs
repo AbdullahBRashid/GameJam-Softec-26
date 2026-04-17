@@ -53,8 +53,8 @@ public static class GameEventManager
     public static event Action<int> OnLevelMilestoneReached;
 
     // ─── Narrative Events ───────────────────────────────────────────
-    /// <summary>Fired to display narrator text. Args: (string message, float duration)</summary>
-    public static event Action<string, float> OnNarratorSpeak;
+    /// <summary>Fired to display narrator text and play audio. Args: (string text, AudioClip clip, float duration)</summary>
+    public static event Action<string, AudioClip, float> OnNarratorSpeak;
 
     // ─── Player State Events ────────────────────────────────────────
     /// <summary>Fired when player controls should be inverted. Args: (bool isInverted)</summary>
@@ -157,9 +157,19 @@ public static class GameEventManager
         OnLevelMilestoneReached?.Invoke(levelIndex);
     }
 
-    public static void NarratorSpeak(string message, float duration = 4f)
+    public static void NarratorSpeak(string messageName, float duration = 4f)
     {
-        OnNarratorSpeak?.Invoke(message, duration);
+        string actualText = NarratorLinesSO.Instance.GetLine(messageName);
+        if (string.IsNullOrEmpty(actualText) || actualText.StartsWith("[Missing Line"))
+            actualText = messageName; // Fallback in case they pass raw text or missing
+
+        AudioClip clip = Resources.Load<AudioClip>($"Audio/Narrator Voicelines/{messageName}");
+#if UNITY_EDITOR
+        if (clip == null) clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>($"Assets/Audio/Narrator Voicelines/{messageName}.wav");
+        if (clip == null) clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>($"Assets/Audio/Narrator Voicelines/{messageName}.mp3");
+#endif
+
+        OnNarratorSpeak?.Invoke(actualText, clip, duration);
     }
 
     public static void ControlsInverted(bool isInverted)

@@ -254,8 +254,7 @@ public class AttributeController : MonoBehaviour
 
         if (isLocked)
         {
-            string actualText = NarratorLinesSO.Instance.GetLine(lockedMessageName);
-            GameEventManager.NarratorSpeak(actualText, 3f);
+            GameEventManager.NarratorSpeak(lockedMessageName, 3f);
             return null;
         }
 
