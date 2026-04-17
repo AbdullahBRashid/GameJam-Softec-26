@@ -43,6 +43,15 @@ public class PlayerMovement : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // --- FPS Camera Clipping Fix ---
+        Camera mainCam = Camera.main;
+        if (mainCam != null)
+        {
+            // Reduce near clip plane to prevent clipping through walls when close
+            // This is still essential even with physical camera collision.
+            mainCam.nearClipPlane = 0.01f;
+        }
     }
 
     private void Awake()

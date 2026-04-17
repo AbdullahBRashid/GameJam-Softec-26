@@ -533,10 +533,10 @@ public class InteractionSystem : MonoBehaviour
             yield return null;
         }
 
-        // 4. Teleport to stage 1
+        // 4. Teleport to stage 0
         if (StageManager.Instance != null)
         {
-            StageManager.Instance.TeleportToStage(1);
+            StageManager.Instance.TeleportToStage(0);
         }
 
         // 5. Fade out Black

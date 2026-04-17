@@ -207,7 +207,7 @@ MonoBehaviour:
   localOffset: {x: 0.493, y: 0.725, z: -0.303}
   fadeSpeed: 5
   tooltipSprite: {fileID: 21300000, guid: 75de9942ea34f1943b72bb2664d12b80, type: 3}
-  tooltipSize: {x: 0.2, y: 0.25}
+  tooltipSize: {x: 0.15, y: 0.1875}
 --- !u!1 &3817736370780571174
 GameObject:
   m_ObjectHideFlags: 0
