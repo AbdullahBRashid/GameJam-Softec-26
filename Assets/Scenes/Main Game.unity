@@ -14428,7 +14428,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeController
   category: 4
-  compatibleAttributes: []
+  compatibleAttributes:
+  - {fileID: 11400000, guid: 0eaad27b4eba3534e9fbf7392d8b2ad7, type: 2}
   defaultAttributes: []
   activeAttributes: []
   maxAttributes: 3
