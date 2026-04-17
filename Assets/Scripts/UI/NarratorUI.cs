@@ -39,8 +39,14 @@ public class NarratorUI : MonoBehaviour
     private readonly Color _prefixColor = new Color(0.4f, 0.7f, 1f, 0.7f);
     private readonly Color _hintColor = new Color(0.6f, 0.65f, 0.72f, 1f);
 
+    // ── Components ──
+    private AudioSource _audioSource;
+
     private void Start()
     {
+        _audioSource = gameObject.AddComponent<AudioSource>();
+        _audioSource.playOnAwake = false;
+        _audioSource.spatialBlend = 0f; // 2D sound
         BuildUI();
 
         if (showStartHint)
@@ -61,8 +67,14 @@ public class NarratorUI : MonoBehaviour
 
     // ═══ Event Handler ══════════════════════════════════════════════
 
-    private void OnNarratorSpeak(string message, float duration)
+    private void OnNarratorSpeak(string message, AudioClip clip, float duration)
     {
+        if (clip != null && _audioSource != null)
+        {
+            _audioSource.Stop();
+            _audioSource.PlayOneShot(clip);
+        }
+
         SpawnAndType(message, duration, false);
     }
 
@@ -72,6 +84,7 @@ public class NarratorUI : MonoBehaviour
     {
         yield return new WaitForSeconds(hintDelay);
         SpawnAndType("Look at objects and press  E  to interact with them.", hintDuration, true);
+        GameEventManager.NarratorSpeak("IntroMessage", hintDuration);
     }
 
     // ═══ Typewriter ═════════════════════════════════════════════════

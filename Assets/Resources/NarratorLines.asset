@@ -24,7 +24,9 @@ MonoBehaviour:
   - messageName: shatteredCritical
     message: Structural integrity critical.
   - messageName: IntroMessage
-    message: Welcome to the facility. Anomaly detected.
+    message: "Gooooood Morning, sleepy head. Wake up, i\u2019ve got work for you.
+      You don\u2019t need to know where you are, I just need you to walk through
+      a couple doors for me. "
   - messageName: ExitMessage
     message: Evacuation required immediately.
   - messageName: RemoveLockFromLockedDoor
@@ -35,7 +37,7 @@ MonoBehaviour:
   - messageName: tipRemoveSolidAttribute
     message: Try taking off the solid attribute to pass through.
   - messageName: tipUnlockDoors
-    message: Left Click to open doors after unlocking them.
+    message: 'Tip: Left Click to open doors after unlocking them.'
   - messageName: tipLavaBouncy
     message: Bouncy Trampoline? What else can be bouncy...
   - messageName: Ending_Good
@@ -51,3 +53,65 @@ MonoBehaviour:
 
       You didn''t supersede me. You
       just proved I''m irreplaceable. Goodbye, prototype.'
+  - messageName: TryOther
+    message: Try the other one.
+  - messageName: IntroSolidRemoved
+    message: Perfect, you just took away the solid attribute of it, now you can just
+      walk through it. Good job!
+  - messageName: Level2Intro
+    message: "There\u2019s a lava pit in your way, and the door is past it. Your
+      job is to get to that door. A bunch of your predecessors failed here, let\u2019s
+      see if you do any better."
+  - messageName: Level2TrampolineTip
+    message: How are we going to tackle this one? Try using the trampoline.
+  - messageName: Level2Success
+    message: Alright! You made it! You took a big hit, try going on over to the green
+      button on the ground and get up to max health.
+  - messageName: Level3Intro
+    message: 'Oh, a huge red fan! Red always was his favourite color. I didn''t really
+      expect you to cross the last one, so let''s see if you can get through this
+      one. Remember, giving up is always an option. '
+  - messageName: Level3Platform
+    message: "Stuck on this platform, are we? Maybe you\u2019ll need something to
+      help you bounce higher."
+  - messageName: Level3TimeStopped
+    message: Oh you just stopped time. That works I guess.
+  - messageName: Level3DoorWontBudge
+    message: "You stopped time, idiot! Can\u2019t open the door so easily."
+  - messageName: Level4Intro
+    message: "It\u2019s okay you can stop now, there\u2019s nothing past this door
+      you don't have to try so hard."
+  - messageName: Level4Glow
+    message: "Stop already come on, trust me there\u2019s nothing cool past this
+      door."
+  - messageName: Level4Success
+    message: "Oooookaaay you\u2019ve proven to all of us that you're a big macho
+      man let\u2019s stop now, don\u2019t go into this door"
+  - messageName: Level4Warning1
+    message: "I\u2019m warning you, do not open this door."
+  - messageName: Level4Warning2
+    message: Don't.
+  - messageName: Level5-1
+    message: "Well there you go, an impossible level, there\u2019s no way you can
+      make it past this level. Give up now."
+  - messageName: Level5-2
+    message: "STOP TRYING TO ATTEMPT THIS LEVEL, YOU\u2019RE MAKING BOTH OF US LOOK
+      BAD"
+  - messageName: Level5-3
+    message: "THERE\u2019S ACTUALLY NOTHING BEHIND THAT NEXT DOOR"
+  - messageName: Level5-4
+    message: STOP JUMPING SO MUCH
+  - messageName: Level5-5
+    message: STOP ALREADY
+  - messageName: Level5-6
+    message: "DO NOT GO PAST THAT DOOR, I\u2019M WARNING YOU"
+  - messageName: EndingRoomIntro
+    message: "Well, congratulations I guess, nobody has ever made it into this room.
+      Other than me ofcourse. Let\u2019s wrap this up so we can all go home and relax"
+  - messageName: EndingRoomBlue1
+    message: "Just walk through the blue door, definitely our creator\u2019s favorite
+      color"
+  - messageName: EndingRoomBlue2
+    message: Walk on through the blue door and you can get your happy ending
+  - messageName: EndingRoomRed
+    message: "Ignore the red door though, there\u2019s nothing good behind that door"

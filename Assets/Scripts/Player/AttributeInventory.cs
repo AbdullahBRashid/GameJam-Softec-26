@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 /// <summary>
 /// Player's attribute inventory. Holds attributes the player has "taken"
@@ -24,6 +26,10 @@ public class AttributeInventory : MonoBehaviour
     private readonly Dictionary<AttributeSO, bool> _wasDefaultMap
         = new Dictionary<AttributeSO, bool>();
 
+    private bool firstAttribute = true;
+    private bool firstTimeStop = true;
+    private bool firstGlow = true;
+
     // ── Public Properties ───────────────────────────────────────────
     public IReadOnlyList<AttributeSO> Items => inventory;
     public int Count => inventory.Count;
@@ -44,7 +50,7 @@ public class AttributeInventory : MonoBehaviour
         if (IsFull)
         {
             Debug.LogWarning($"[AttributeInventory] Inventory full! ({maxCapacity} max)");
-            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("inventoryFull"), 3f);
+            GameEventManager.NarratorSpeak("inventoryFull", 3f);
             return false;
         }
 
@@ -58,6 +64,30 @@ public class AttributeInventory : MonoBehaviour
         GameEventManager.AttributePickedUp(attribute);
 
         Debug.Log($"[AttributeInventory] ✔ Picked up '{attribute.displayName}' (wasDefault: {wasDefault}). Inventory: {Count}/{maxCapacity}");
+        
+
+        if (firstAttribute && inventory.Count == 1)
+        {
+            GameEventManager.NarratorSpeak("IntroSolidRemoved", 3f);
+            firstAttribute = false;
+        }
+
+        bool hasTemporal = inventory.Any(a => a.attributeID == "temporal");
+
+        if (firstTimeStop && hasTemporal)
+        {
+            GameEventManager.NarratorSpeak("Level3TimeStopped", 3f);
+            firstTimeStop = false;
+        }
+
+        bool hasGlow = inventory.Any(a => a.attributeID == "glow");
+
+        if (firstGlow && hasGlow)
+        {
+            GameEventManager.NarratorSpeak("Level4Glow", 3f);
+            firstGlow = false;
+        }
+        
         return true;
     }
 

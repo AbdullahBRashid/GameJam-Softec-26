@@ -80,10 +80,9 @@ public class NarratorTrigger : MonoBehaviour
             yield return new WaitForSeconds(delayInSeconds);
         }
 
-        string actualText = NarratorLinesSO.Instance.GetLine(messageName);
-        Debug.Log($"[NarratorTrigger] Firing event for '{messageName}': \"{actualText}\"");
+        Debug.Log($"[NarratorTrigger] Firing event for '{messageName}'");
         // Show UI text using the existing central event system
-        GameEventManager.NarratorSpeak(actualText, displayDuration);
+        GameEventManager.NarratorSpeak(messageName, displayDuration);
 
         // Play optional audio
         if (voiceLine != null && _audioSource != null)
