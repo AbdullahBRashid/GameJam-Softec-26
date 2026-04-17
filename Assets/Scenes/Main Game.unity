@@ -1490,7 +1490,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &252498160
 GameObject:
   m_ObjectHideFlags: 0
@@ -6683,7 +6683,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &602087635
 GameObject:
   m_ObjectHideFlags: 0
@@ -7212,7 +7212,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9185462922908140346, guid: 5039ba93736c86c43bcf9793d4295079, type: 3}
       propertyPath: lockedMessage
-      value: Nice try, but that one needs a key.
+      value: Let's not get distracted here, this room doens't need any testing. Please
+        proceed to the next stage instead.
+      objectReference: {fileID: 0}
+    - target: {fileID: 9185462922908140346, guid: 5039ba93736c86c43bcf9793d4295079, type: 3}
+      propertyPath: lockedMessageName
+      value: RemoveLockFromLockedDoor
       objectReference: {fileID: 0}
     - target: {fileID: 9185462922908140346, guid: 5039ba93736c86c43bcf9793d4295079, type: 3}
       propertyPath: compatibleAttributes.Array.size
@@ -7607,7 +7612,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!114 &703732827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11252,7 +11257,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!65 &1049632890
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -13470,7 +13475,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c60362e5cca22084db704b11e1dd6fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NarratorTrigger
-  dialogueText: Left Click to open doors after unlocking them.
+  messageName: IntroMessage
   displayDuration: 4
   delayInSeconds: 0
   triggerOnlyOnce: 1
@@ -14134,7 +14139,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &1318233212
 GameObject:
   m_ObjectHideFlags: 0
@@ -15487,7 +15492,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!54 &1496165258
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -16115,7 +16120,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &1567587620
 GameObject:
   m_ObjectHideFlags: 0
@@ -18950,7 +18955,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!114 &1832027179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19650,7 +19655,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c60362e5cca22084db704b11e1dd6fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NarratorTrigger
-  dialogueText: Try taking off the solid attribute to pass through.
+  messageName: IntroMessage
   displayDuration: 3
   delayInSeconds: 0
   triggerOnlyOnce: 1
@@ -20442,7 +20447,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &1963201874
 GameObject:
   m_ObjectHideFlags: 0
@@ -20870,7 +20875,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!65 &1983866371
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21660,7 +21665,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &2139073292
 GameObject:
   m_ObjectHideFlags: 0
@@ -21796,7 +21801,7 @@ MonoBehaviour:
   restrictAllowedAttributes: 0
   allowedAttributes: []
   isLocked: 0
-  lockedMessage: Nice try, but that one stays.
+  lockedMessageName: Nice try, but that one stays.
 --- !u!1 &212778748750248797
 GameObject:
   m_ObjectHideFlags: 0

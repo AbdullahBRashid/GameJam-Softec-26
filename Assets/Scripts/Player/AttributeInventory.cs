@@ -44,7 +44,7 @@ public class AttributeInventory : MonoBehaviour
         if (IsFull)
         {
             Debug.LogWarning($"[AttributeInventory] Inventory full! ({maxCapacity} max)");
-            GameEventManager.NarratorSpeak("Your pockets are full. Drop something first.", 3f);
+            GameEventManager.NarratorSpeak(NarratorLinesSO.Instance.GetLine("inventoryFull"), 3f);
             return false;
         }
 
