@@ -54,6 +54,9 @@ public class AttributeSO : ScriptableObject
     [Tooltip("Can this attribute be locked by the AI Director?")]
     public bool canBeLocked = true;
 
+    [Tooltip("Can this attribute be discarded by the player?")]
+    public bool canBeDiscarded = true;
+
     // ═══ Helper Methods ═════════════════════════════════════════════
 
     /// <summary>

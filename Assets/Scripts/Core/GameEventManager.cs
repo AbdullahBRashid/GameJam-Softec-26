@@ -35,6 +35,9 @@ public static class GameEventManager
     /// <summary>Fired when the player uses an attribute from inventory. Args: (AttributeSO)</summary>
     public static event Action<AttributeSO> OnAttributeDropped;
 
+    /// <summary>Fired when the player discards an attribute from inventory. Args: (AttributeSO, bool wasDefault)</summary>
+    public static event Action<AttributeSO, bool> OnAttributeDiscarded;
+
     // ─── Volatility Events ──────────────────────────────────────────
     /// <summary>Fired every time volatility changes. Args: (float currentVolatility, float delta)</summary>
     public static event Action<float, float> OnVolatilityChanged;
@@ -130,6 +133,11 @@ public static class GameEventManager
     public static void AttributeDropped(AttributeSO attribute)
     {
         OnAttributeDropped?.Invoke(attribute);
+    }
+
+    public static void AttributeDiscarded(AttributeSO attribute, bool wasDefault)
+    {
+        OnAttributeDiscarded?.Invoke(attribute, wasDefault);
     }
 
     public static void VolatilityChanged(float current, float delta)

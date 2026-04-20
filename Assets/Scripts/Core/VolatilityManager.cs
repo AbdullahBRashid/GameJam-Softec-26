@@ -61,6 +61,7 @@ public class VolatilityManager : MonoBehaviour
         GameEventManager.OnForeignAttributeRemoved += HandleForeignRemoved;
         GameEventManager.OnAttributeRestoredToDefault += HandleRestoredToDefault;
         GameEventManager.OnAttributeAppliedToForeign += HandleAppliedToForeign;
+        GameEventManager.OnAttributeDiscarded += HandleDiscarded;
     }
 
     private void OnDisable()
@@ -69,6 +70,7 @@ public class VolatilityManager : MonoBehaviour
         GameEventManager.OnForeignAttributeRemoved -= HandleForeignRemoved;
         GameEventManager.OnAttributeRestoredToDefault -= HandleRestoredToDefault;
         GameEventManager.OnAttributeAppliedToForeign -= HandleAppliedToForeign;
+        GameEventManager.OnAttributeDiscarded -= HandleDiscarded;
     }
 
     private void Update()
@@ -148,6 +150,15 @@ public class VolatilityManager : MonoBehaviour
         float cost = attr != null ? attr.volatilityCost * 0.5f : 2.5f;
         AddVolatility(-cost);
         Debug.Log($"[VolatilityManager] '{attr?.displayName}' applied as foreign to {target.name} → −{cost}");
+    }
+
+    /// <summary>Attribute discarded mapping reverse of take penalty</summary>
+    private void HandleDiscarded(AttributeSO attr, bool wasDefault)
+    {
+        float cost = attr != null ? attr.volatilityCost : 5f;
+        if (!wasDefault) cost *= 0.5f;
+        AddVolatility(-cost);
+        Debug.Log($"[VolatilityManager] '{attr?.displayName}' DISCARDED (wasDefault: {wasDefault}) → −{cost}");
     }
 
     // ═══ Bug Logic ══════════════════════════════════════════════════

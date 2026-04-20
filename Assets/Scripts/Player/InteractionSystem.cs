@@ -399,7 +399,7 @@ public class InteractionSystem : MonoBehaviour
         EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
         entry.callback.AddListener((data) => {
             PointerEventData pData = (PointerEventData)data;
-            if (pData.button == PointerEventData.InputButton.Right)
+            if (pData.button == PointerEventData.InputButton.Right && attr.canBeDiscarded)
             {
                 ShowDiscardMenu(attr, pData.position);
             }
@@ -644,7 +644,10 @@ public class InteractionSystem : MonoBehaviour
     {
         if (_currentDiscardAttr != null && _inventory != null)
         {
+            bool wasDefault = _inventory.WasDefault(_currentDiscardAttr);
             _inventory.RemoveAttribute(_currentDiscardAttr);
+            _inventory.ClearTracking(_currentDiscardAttr);
+            GameEventManager.AttributeDiscarded(_currentDiscardAttr, wasDefault);
             PopulatePanel();
         }
         HideDiscardMenu();

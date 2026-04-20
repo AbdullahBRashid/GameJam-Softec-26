@@ -39590,8 +39590,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.5843925, y: 1.9854255, z: 4.926037}
-  m_Center: {x: 0.7921963, y: 0.5385144, z: -0.059583664}
+  m_Size: {x: 3.442072, y: 1.9854255, z: 4.926037}
+  m_Center: {x: 1.221036, y: 0.5385144, z: -0.059583664}
 --- !u!1 &1889807548
 GameObject:
   m_ObjectHideFlags: 0
@@ -45342,6 +45342,10 @@ PrefabInstance:
     - target: {fileID: 6120085286804488741, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}
       propertyPath: defaultAttributes.Array.size
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6120085286804488741, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}
+      propertyPath: compatibleAttributes.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6120085286804488741, guid: 613fafb835ef57c4e8e8727f66f435a2, type: 3}
       propertyPath: 'defaultAttributes.Array.data[0]'

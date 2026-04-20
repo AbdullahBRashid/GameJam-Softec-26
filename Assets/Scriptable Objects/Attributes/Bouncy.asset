@@ -25,3 +25,4 @@ MonoBehaviour:
   physicsMaterial: {fileID: 13400000, guid: bad54bafe4b4c284880d1468787d3438, type: 2}
   volatilityCost: 15
   canBeLocked: 1
+  canBeDiscarded: 0
