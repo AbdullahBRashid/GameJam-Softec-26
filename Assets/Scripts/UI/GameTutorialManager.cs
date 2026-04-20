@@ -24,6 +24,15 @@ public class GameTutorialManager : MonoBehaviour
 
     private int _currentIndex = 0;
 
+    public static GameTutorialManager Instance { get; private set; }
+    private System.Action _onCloseCallback;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
     private System.Collections.IEnumerator Start()
     {
         // 1. Setup Button Listeners
@@ -37,8 +46,8 @@ public class GameTutorialManager : MonoBehaviour
             OnBackClicked();
         });
         
-        closeButton.onClick.AddListener(StartGame);
-        finishButton.onClick.AddListener(StartGame);
+        closeButton.onClick.AddListener(CloseTutorial);
+        finishButton.onClick.AddListener(CloseTutorial);
 
         // 2. Pause Game
         Time.timeScale = 0f;
@@ -88,18 +97,35 @@ public class GameTutorialManager : MonoBehaviour
         finishButton.gameObject.SetActive(isLastPage);
     }
 
-    private void StartGame()
+    public void OpenTutorial(System.Action onClose = null)
+    {
+        _onCloseCallback = onClose;
+        tutorialPanel.SetActive(true);
+        _currentIndex = 0;
+        RefreshPage();
+    }
+
+    private void CloseTutorial()
     {
         // 1. Close UI
         tutorialPanel.SetActive(false);
 
-        // 2. Resume Game
-        Time.timeScale = 1f;
-        
-        // 3. Relock Cursor (if first person)
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (_onCloseCallback != null)
+        {
+            // If opened from pause menu or another system
+            _onCloseCallback.Invoke();
+            _onCloseCallback = null;
+        }
+        else
+        {
+            // 2. Resume Game (Initial startup case)
+            Time.timeScale = 1f;
+            
+            // 3. Relock Cursor (if first person)
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
 
-        Debug.Log("Tutorial Closed. Game Physics and Time Resumed.");
+            Debug.Log("Tutorial Closed. Game Physics and Time Resumed.");
+        }
     }
 }

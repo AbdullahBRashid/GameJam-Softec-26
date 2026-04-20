@@ -16,6 +16,7 @@ public class PauseMenuUI : MonoBehaviour
 
     private GameObject _rootUI;
     private bool _isPaused = false;
+    private bool _isShowingInstructions = false;
 
     // References to other components to disable
     private MonoBehaviour _cinemachineInput;
@@ -52,7 +53,10 @@ public class PauseMenuUI : MonoBehaviour
         // Detect ESC key via New Input System's Keyboard class for direct polling
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            TogglePause();
+            if (!_isShowingInstructions)
+            {
+                TogglePause();
+            }
         }
     }
 
@@ -139,6 +143,19 @@ public class PauseMenuUI : MonoBehaviour
 #endif
     }
 
+    private void OpenInstructions()
+    {
+        if (GameTutorialManager.Instance != null)
+        {
+            _isShowingInstructions = true;
+            _rootUI.SetActive(false);
+            GameTutorialManager.Instance.OpenTutorial(() => {
+                _isShowingInstructions = false;
+                _rootUI.SetActive(true);
+            });
+        }
+    }
+
     // ═══ UI Generation ═════════════════════════════════════════════
 
     private void BuildUI()
@@ -202,6 +219,7 @@ public class PauseMenuUI : MonoBehaviour
 
         // ── Buttons ──
         CreateButton(menuObj.transform, "RESUME", ResumeGame);
+        CreateButton(menuObj.transform, "INSTRUCTIONS", OpenInstructions);
         CreateButton(menuObj.transform, "RESET STAGE", ResetStage);
         CreateButton(menuObj.transform, "QUIT GAME", QuitGame);
     }
