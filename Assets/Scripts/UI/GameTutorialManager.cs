@@ -24,7 +24,7 @@ public class GameTutorialManager : MonoBehaviour
 
     private int _currentIndex = 0;
 
-    private void Start()
+    private System.Collections.IEnumerator Start()
     {
         // 1. Setup Button Listeners
         nextButton.onClick.AddListener(() => {
@@ -40,12 +40,16 @@ public class GameTutorialManager : MonoBehaviour
         closeButton.onClick.AddListener(StartGame);
         finishButton.onClick.AddListener(StartGame);
 
-        // 2. Pause Game and Unlock Cursor
+        // 2. Pause Game
         Time.timeScale = 0f;
+        RefreshPage();
+
+        // Wait one frame to ensure PlayerMovement.Start() has already executed
+        yield return null;
+
+        // Unlock Cursor
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-
-        RefreshPage();
     }
 
     private void OnNextClicked()
