@@ -23,5 +23,5 @@ MonoBehaviour:
   applySound: {fileID: 0}
   removeSound: {fileID: 0}
   physicsMaterial: {fileID: 0}
-  volatilityCost: 20
+  volatilityCost: 0
   canBeLocked: 1

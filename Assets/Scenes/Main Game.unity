@@ -10093,7 +10093,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7930452744747660732, guid: b0fd9493d93e1d84d9d4c36223168afd, type: 3}
       propertyPath: maxVolatility
-      value: 120
+      value: 130
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

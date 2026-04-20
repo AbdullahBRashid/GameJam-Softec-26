@@ -30,8 +30,8 @@ MonoBehaviour:
   - messageName: ExitMessage
     message: Evacuation required immediately.
   - messageName: RemoveLockFromLockedDoor
-    message: Let's not get distracted here, this room doesn't need any testing. Please
-      proceed to the next stage instead.
+    message: Let's not get distracted here, this room needs elevated permissions.
+      Please proceed to the next stage instead.
   - messageName: GenericRemoveLockedAttribute
     message: Nice try, but that one stays.
   - messageName: tipRemoveSolidAttribute
